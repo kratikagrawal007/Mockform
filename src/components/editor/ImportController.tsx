@@ -161,7 +161,7 @@ export function ImportController() {
       {dragging && (
         <div className="pointer-events-none fixed inset-0 z-50 grid place-items-center bg-workspace/60 backdrop-blur-[2px]">
           <div className="flex flex-col items-center gap-3 rounded-[20px] border-2 border-dashed border-accent bg-panel-solid px-10 py-8 shadow-panel">
-            <ImagePlus className="size-7 text-accent" aria-hidden />
+            <ImagePlus className="size-7 text-accent-ink" aria-hidden />
             <p className="text-[15px] font-semibold">
               Drop to add screenshots or videos
             </p>

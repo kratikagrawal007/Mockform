@@ -32,20 +32,31 @@ Then open http://localhost:3000.
 
 ## Scripts
 
-| Command             | What it does                                       |
-| ------------------- | -------------------------------------------------- |
-| `npm run dev`       | Start the development server                       |
-| `npm run build`     | Build a static export into `out/`                  |
-| `npm start`         | Serve the static build on http://localhost:3100    |
-| `npm run typecheck` | Type-check with TypeScript                         |
-| `npm run lint`      | Lint with ESLint                                   |
-| `npm run format`    | Format with Prettier                               |
-| `npm test`          | Run unit tests with Vitest                         |
-| `npm run test:e2e`  | Build, serve and run end-to-end tests (Playwright) |
+| Command             | What it does                                                                 |
+| ------------------- | ---------------------------------------------------------------------------- |
+| `npm run dev`       | Start the development server                                                 |
+| `npm run build`     | Build a static export into `out/`                                            |
+| `npm start`         | Serve the static build on http://localhost:3100                              |
+| `npm run typecheck` | Type-check with TypeScript                                                   |
+| `npm run lint`      | Lint with ESLint                                                             |
+| `npm run format`    | Format with Prettier                                                         |
+| `npm test`          | Run unit tests with Vitest                                                   |
+| `npm run test:e2e`  | Build, serve and run end-to-end tests (Playwright)                           |
+| `npm run assets`    | Regenerate icons, link preview and launch images (needs `npm start` running) |
+
+## Deploying
+
+Mockform builds to plain static files in `out/`, so any static host works. On Vercel, import the repository with the default Next.js settings.
+
+Set `NEXT_PUBLIC_SITE_URL` to the public address (for example `https://mockform.example.com`) so link previews, the sitemap and robots.txt use absolute URLs.
+
+## Accessibility
+
+The editor is fully usable from the keyboard, respects reduced motion, and is checked against WCAG 2.1 AA with axe in both themes as part of the end-to-end tests.
 
 ## Tech stack
 
-Next.js (App Router, static export), React, TypeScript, Tailwind CSS, Zustand, Lucide icons, Vitest and Playwright. The UI uses the Geist and Geist Mono typefaces, bundled at build time.
+Next.js (App Router, static export), React, TypeScript, Tailwind CSS, Zustand, Lucide icons, WebGL2 for perspective, WebCodecs with Mediabunny for video export, Vitest and Playwright. The UI uses the Geist and Geist Mono typefaces, bundled at build time.
 
 ## Project structure
 
@@ -56,12 +67,14 @@ src/components/editor/ Editor: top bar, panels, stage, export menu, import handl
 src/editor/           Framework-free core: scene model, undo history, devices,
                       renderer, import, export
 src/lib/              Small helpers (theme)
-e2e/                  End-to-end tests
+e2e/                  End-to-end and accessibility tests
+scripts/              Launch-asset generator
+marketing/            Generated launch images
 ```
 
 ## Privacy
 
-Mockform processes every image in your browser. Your screenshots are never uploaded.
+Mockform processes every image and video in your browser. Nothing is uploaded, and there's no tracking. See the [privacy page](src/app/privacy/page.tsx).
 
 ## License
 

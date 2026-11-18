@@ -9,7 +9,7 @@ export function SmallScreenNotice() {
       className="flex h-dvh flex-col items-center justify-center gap-5 bg-workspace px-6 text-center md:hidden"
     >
       <Logo />
-      <div className="grid size-12 place-items-center rounded-full bg-accent-soft text-accent">
+      <div className="grid size-12 place-items-center rounded-full bg-accent-soft text-accent-ink">
         <Monitor className="size-5" aria-hidden />
       </div>
       <div className="max-w-xs space-y-2">

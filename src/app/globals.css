@@ -19,12 +19,15 @@
   --mf-border-strong: rgb(255 255 255 / 0.14);
 
   --mf-text: #f3f2ef;
-  --mf-text-muted: #a3a1a8;
-  --mf-text-faint: #8a8890;
+  --mf-text-muted: #b3b1b8;
+  --mf-text-faint: #9a98a0;
 
-  --mf-accent: #7c5cff;
-  --mf-accent-hover: #8d71ff;
-  --mf-accent-soft: rgb(124 92 255 / 0.16);
+  --mf-accent: #6d4aff;
+  --mf-accent-hover: #5c38f5;
+  --mf-accent-soft: rgb(109 74 255 / 0.16);
+  /* Accent-coloured text and icons: lighter so it reads on dark surfaces (AA). */
+  --mf-accent-ink: #a993ff;
+  --mf-danger: #ff7b6e;
   --mf-on-accent: #ffffff;
 
   --mf-shadow-panel:
@@ -47,11 +50,13 @@
 
   --mf-text: #16151a;
   --mf-text-muted: #5f5d66;
-  --mf-text-faint: #75737c;
+  --mf-text-faint: #66646d;
 
   --mf-accent: #6d4aff;
   --mf-accent-hover: #5c38f5;
   --mf-accent-soft: rgb(109 74 255 / 0.1);
+  --mf-accent-ink: #5a37f0;
+  --mf-danger: #c62f24;
   --mf-on-accent: #ffffff;
 
   --mf-shadow-panel:
@@ -74,6 +79,8 @@
   --color-accent: var(--mf-accent);
   --color-accent-hover: var(--mf-accent-hover);
   --color-accent-soft: var(--mf-accent-soft);
+  --color-accent-ink: var(--mf-accent-ink);
+  --color-danger: var(--mf-danger);
   --color-on-accent: var(--mf-on-accent);
 
   --shadow-panel: var(--mf-shadow-panel);

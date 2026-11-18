@@ -25,6 +25,7 @@ import {
 export class ExportCancelled extends Error {
   constructor() {
     super("Export cancelled");
+    this.name = "ExportCancelled";
   }
 }
 

@@ -14,6 +14,16 @@ test("layouts add devices and several screenshots fill them in order", async ({
 
   await importShots(page, ["a.png", "b.png", "c.png"]);
   await expect(page.getByTestId("drop-prompt")).toHaveCount(0);
+  // Several files fill from Device 1, whichever device is selected.
+  const tabs = page.getByRole("radiogroup", { name: "Device to edit" });
+  for (const [i, name] of ["a.png", "b.png", "c.png"].entries()) {
+    await tabs.getByRole("radio").nth(i).click();
+    await expect(
+      page
+        .getByRole("complementary", { name: "Scene settings" })
+        .getByText(name),
+    ).toBeVisible();
+  }
 
   await page.getByRole("radio", { name: "Solo", exact: true }).click();
   await expect(

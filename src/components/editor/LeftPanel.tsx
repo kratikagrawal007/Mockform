@@ -112,7 +112,7 @@ function DevicesSection() {
             >
               {f.label}
               <span
-                className={`font-mono text-[10px] ${selected ? "text-on-accent/70" : "text-faint"}`}
+                className={`font-mono text-[10px] ${selected ? "text-on-accent" : "text-faint"}`}
               >
                 {count(f.id)}
               </span>
@@ -199,7 +199,7 @@ function LayoutsSection() {
               onClick={() => setLayout(l.id)}
               className={`flex flex-col items-center gap-1 rounded-[10px] border px-1 pt-1.5 pb-1 transition-colors duration-150 ${
                 selected
-                  ? "border-accent bg-accent-soft text-accent"
+                  ? "border-accent bg-accent-soft text-accent-ink"
                   : "border-hairline text-muted hover:bg-hover hover:text-ink"
               }`}
             >

@@ -549,7 +549,7 @@ function SelectionBox({
           <span className="absolute top-0 left-1/2 h-5 w-px -translate-y-full bg-accent/80" />
           <span
             data-testid="rotate-handle"
-            className="pointer-events-auto absolute top-0 left-1/2 grid size-5 -translate-x-1/2 -translate-y-[calc(100%+18px)] cursor-grab place-items-center rounded-full border border-accent bg-white text-accent shadow-sm"
+            className="pointer-events-auto absolute top-0 left-1/2 grid size-5 -translate-x-1/2 -translate-y-[calc(100%+18px)] cursor-grab place-items-center rounded-full border border-accent bg-white text-accent-ink shadow-sm"
             onPointerDown={onRotate}
             {...handlers}
           >

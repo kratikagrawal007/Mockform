@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Dialog } from "@/components/ui/Dialog";
 import { useUI } from "@/editor/store/editor";
 import { SHORTCUTS } from "@/hooks/useShortcuts";
@@ -61,7 +62,20 @@ export function Dialogs() {
             platform names in the size presets only describe dimensions.
           </p>
           <p className="border-t border-hairline pt-3 text-label text-faint">
-            Version 0.4 · © 2026 Kratik Agrawal · MIT licence
+            Version 0.5 · © 2026 Kratik Agrawal · MIT licence ·{" "}
+            <Link
+              href="/privacy"
+              className="text-accent-ink underline underline-offset-2"
+            >
+              Privacy
+            </Link>{" "}
+            ·{" "}
+            <a
+              href="https://github.com/kratikagrawal007/Mockform"
+              className="text-accent-ink underline underline-offset-2"
+            >
+              Source
+            </a>
           </p>
         </div>
       </Dialog>

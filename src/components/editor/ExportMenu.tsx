@@ -199,7 +199,7 @@ export function ExportMenu() {
                 />
               )}
               <p
-                className={`font-mono text-label tabular-nums ${size.ok ? "text-faint" : "text-[#ff6b5e]"}`}
+                className={`font-mono text-label tabular-nums ${size.ok ? "text-faint" : "text-danger"}`}
                 data-testid="export-size"
               >
                 {size.ok ? `${size.width} × ${size.height} px` : size.message}

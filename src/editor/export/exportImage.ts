@@ -12,7 +12,6 @@ import {
   sceneVideos,
   usePlayback,
 } from "@/editor/video/playback";
-import { ExportCancelled, exportVideo } from "./exportVideo";
 import { exportFileName, exportSize } from "./limits";
 
 /** Renders the scene offscreen at the requested size. No editor UI is ever included. */
@@ -75,6 +74,8 @@ async function downloadVideo(settings: ExportSettings) {
   const wasPlaying = usePlayback.getState().playing;
   useUI.getState().setVideoProgress(0);
   try {
+    // The encoder is only downloaded when someone exports a video.
+    const { exportVideo } = await import("./exportVideo");
     const { blob, name } = await exportVideo(
       settings.videoResolution,
       (p) => useUI.getState().setVideoProgress(p),
@@ -84,7 +85,8 @@ async function downloadVideo(settings: ExportSettings) {
     useUI.getState().markExported();
     toast(`Saved ${name}`);
   } catch (e) {
-    if (e instanceof ExportCancelled) toast("Video export cancelled");
+    if (e instanceof Error && e.name === "ExportCancelled")
+      toast("Video export cancelled");
     else
       toast(e instanceof Error ? e.message : "Video export failed.", "error");
   } finally {

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import { themeBootScript } from "@/lib/theme";
 import "./globals.css";
 
@@ -16,11 +17,42 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mockform — Device mockups from screenshots",
-  description:
-    "Turn screenshots into polished device mockups, right in your browser. No uploads, no sign-up.",
-  applicationName: "Mockform",
+  metadataBase: new URL(SITE_URL),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   authors: [{ name: "Kratik Agrawal" }],
+  keywords: [
+    "device mockup",
+    "mockup generator",
+    "screenshot mockup",
+    "app store screenshots",
+    "phone mockup",
+    "laptop mockup",
+  ],
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "Mockform: a browser window mockup on a violet gradient",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/og.png"],
+  },
+  icons: { apple: "/apple-icon.png" },
 };
 
 export const viewport: Viewport = {

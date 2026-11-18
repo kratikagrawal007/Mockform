@@ -94,7 +94,7 @@ export function PerspectiveSection({ device }: { device: DeviceInstance }) {
               onClick={() => updateDevice(device.key, { perspective: p.id })}
               className={`flex flex-col items-center gap-0.5 rounded-[10px] border px-1 py-1.5 transition-colors duration-150 disabled:opacity-35 ${
                 selected
-                  ? "border-accent bg-accent-soft text-accent"
+                  ? "border-accent bg-accent-soft text-accent-ink"
                   : "border-hairline text-muted hover:bg-hover hover:text-ink"
               }`}
             >

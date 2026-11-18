@@ -138,3 +138,23 @@ export function startAutosave() {
     clearTimeout(timer);
   };
 }
+
+/**
+ * Last-resort recovery: forget the saved scene and every stored image, video
+ * and frame. Used by the error screen when a saved session keeps crashing.
+ */
+export async function clearSavedSession() {
+  try {
+    localStorage.removeItem(SCENE_KEY);
+  } catch {
+    // ignore
+  }
+  await new Promise<void>((resolve) => {
+    try {
+      const req = indexedDB.deleteDatabase("mockform");
+      req.onsuccess = req.onerror = req.onblocked = () => resolve();
+    } catch {
+      resolve();
+    }
+  });
+}

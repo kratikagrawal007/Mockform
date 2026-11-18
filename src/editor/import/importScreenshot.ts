@@ -51,8 +51,8 @@ export async function loadImageAsset(
 }
 
 /**
- * Places screenshots on devices, starting with the selected one. Several files
- * at once fill the layout's devices in order. Never throws.
+ * Places screenshots on devices. A single file goes to the selected device;
+ * several at once fill the layout's devices in order from the first. Never throws.
  */
 export async function importScreenshots(
   files: ArrayLike<File>,
@@ -65,10 +65,16 @@ export async function importScreenshots(
   if (!candidates.length) return false;
 
   const scene = getScene();
-  const start = Math.max(
-    0,
-    scene.devices.indexOf(selectedDevice(scene, useUI.getState().selectedKey)),
-  );
+  // One file goes to the selected device; several fill the devices in order from Device 1.
+  const start =
+    candidates.length > 1
+      ? 0
+      : Math.max(
+          0,
+          scene.devices.indexOf(
+            selectedDevice(scene, useUI.getState().selectedKey),
+          ),
+        );
   const usable = candidates.slice(0, scene.devices.length);
   if (candidates.length > usable.length) {
     toast(

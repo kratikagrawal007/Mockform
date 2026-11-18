@@ -19,9 +19,9 @@ export function Toaster() {
           className="pointer-events-auto flex items-center gap-2 rounded-full border border-hairline bg-panel-solid py-2 pr-2 pl-3 text-ui shadow-panel"
         >
           {t.tone === "error" ? (
-            <CircleAlert className="size-4 text-[#ff6b5e]" aria-hidden />
+            <CircleAlert className="size-4 text-danger" aria-hidden />
           ) : (
-            <CircleCheck className="size-4 text-accent" aria-hidden />
+            <CircleCheck className="size-4 text-accent-ink" aria-hidden />
           )}
           {t.message}
           <button
