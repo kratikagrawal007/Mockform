@@ -92,21 +92,21 @@ const C = (
 });
 
 const PRO_COLORS = [
-  C("graphite", "Graphite", "#3a3a3d", "#6b6b70"),
-  C("silver", "Silver", "#d9d9db", "#f4f4f5"),
-  C("sand", "Sand", "#c9b79c", "#e6d9c4"),
-  C("dusk", "Dusk", "#4b4a6b", "#7a78a6"),
+  C("graphite", "Black Titanium", "#3c3c3f", "#a3a3a8"),
+  C("silver", "Natural Titanium", "#bdb9b2", "#f3f1ec"),
+  C("sand", "Desert Titanium", "#bfa98d", "#efe2cf"),
+  C("dusk", "Blue Titanium", "#3e4656", "#9aa4b8"),
 ];
 const POP_COLORS = [
-  C("midnight", "Midnight", "#1f2430", "#4a5163"),
-  C("mint", "Mint", "#a9d8c4", "#d3efe3"),
-  C("coral", "Coral", "#f0907a", "#f8c0b2"),
-  C("cloud", "Cloud", "#e9e7e3", "#ffffff"),
+  C("midnight", "Midnight", "#22262f", "#6b7386"),
+  C("mint", "Mint", "#a7d6c2", "#e6f6ee"),
+  C("coral", "Coral", "#ec8c77", "#fbd2c6"),
+  C("cloud", "Cloud", "#e6e4df", "#ffffff"),
 ];
 const METAL_COLORS = [
-  C("space", "Space", "#3d3e42", "#696a70"),
-  C("silver", "Silver", "#cfd0d4", "#eeeff1"),
-  C("midnight", "Midnight", "#24283a", "#4a5068"),
+  C("space", "Space Grey", "#4a4b50", "#a4a6ad"),
+  C("silver", "Silver", "#d4d5d9", "#fbfbfc"),
+  C("midnight", "Midnight", "#262a3b", "#6e7591"),
 ];
 const CLASSIC_COLORS = [
   C("space", "Space", "#3b3b3f", "#6a6a6f", { face: "#0b0b0c" }),

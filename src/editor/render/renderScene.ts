@@ -1,5 +1,6 @@
 import { backgroundGradient } from "@/editor/backgrounds";
 import { drawDevice, traceSilhouette } from "@/editor/devices/draw";
+import { castShadow } from "@/editor/devices/material";
 import type {
   ImageAsset,
   Resolved,
@@ -12,14 +13,27 @@ import { maxTextureSize, projectImage, webglAvailable } from "./webglProject";
 
 type Ctx = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
-/** Shadow sizes as a share of the device's height. */
+/**
+ * Each shadow preset is two layers, sized as a share of the device's height:
+ * a broad, faint ambient shadow and a tight, darker contact shadow where the
+ * device meets the surface. Together they read as a real object on a table.
+ */
 const SHADOWS: Record<
   Exclude<ShadowPreset, "none">,
-  { blur: number; y: number; alpha: number }
+  { blur: number; y: number; alpha: number }[]
 > = {
-  soft: { blur: 0.04, y: 0.02, alpha: 0.28 },
-  medium: { blur: 0.07, y: 0.04, alpha: 0.38 },
-  strong: { blur: 0.11, y: 0.07, alpha: 0.5 },
+  soft: [
+    { blur: 0.05, y: 0.022, alpha: 0.2 },
+    { blur: 0.008, y: 0.004, alpha: 0.18 },
+  ],
+  medium: [
+    { blur: 0.09, y: 0.045, alpha: 0.3 },
+    { blur: 0.014, y: 0.008, alpha: 0.28 },
+  ],
+  strong: [
+    { blur: 0.14, y: 0.08, alpha: 0.42 },
+    { blur: 0.022, y: 0.014, alpha: 0.38 },
+  ],
 };
 
 export function drawBackground(
@@ -65,14 +79,22 @@ export function drawBackground(
   }
 }
 
-/** Applies the drop shadow for a device, sized in output pixels (canvas shadows ignore transforms). */
-function applyShadow(ctx: Ctx, shadow: ShadowPreset, deviceHeightPx: number) {
+/** Paints the shadow layers for a shape (never the shape itself). Sizes are in output pixels. */
+function paintShadows(
+  ctx: Ctx,
+  shadow: ShadowPreset,
+  deviceHeightPx: number,
+  draw: () => void,
+) {
   if (shadow === "none") return;
-  const sh = SHADOWS[shadow];
-  ctx.shadowColor = `rgba(0,0,0,${sh.alpha})`;
-  ctx.shadowBlur = sh.blur * deviceHeightPx;
-  // The offset points straight down on the canvas regardless of device rotation.
-  ctx.shadowOffsetY = sh.y * deviceHeightPx;
+  for (const layer of SHADOWS[shadow]) {
+    castShadow(ctx, draw, {
+      blur: layer.blur * deviceHeightPx,
+      // The offset points straight down on the canvas regardless of device rotation.
+      offsetY: layer.y * deviceHeightPx,
+      color: `rgba(0,0,0,${layer.alpha})`,
+    });
+  }
 }
 
 function screenImage(image: ImageAsset | null) {
@@ -129,15 +151,18 @@ function drawTilted(
   ctx.save();
   ctx.translate(place.cx, place.cy);
   ctx.rotate(place.rotation);
-  applyShadow(ctx, shadow, geo.height * k);
+  const drawProjected = () =>
+    ctx.drawImage(
+      out.canvas,
+      out.x / pxScale,
+      out.y / pxScale,
+      out.width / pxScale,
+      out.height / pxScale,
+    );
   ctx.imageSmoothingQuality = "high";
-  ctx.drawImage(
-    out.canvas,
-    out.x / pxScale,
-    out.y / pxScale,
-    out.width / pxScale,
-    out.height / pxScale,
-  );
+  // The shadow follows the tilted device's own outline.
+  paintShadows(ctx, shadow, geo.height * k, drawProjected);
+  drawProjected();
   ctx.restore();
   return true;
 }
@@ -159,9 +184,7 @@ function drawOne(
   ctx.scale(place.scale, place.scale);
   ctx.translate(-geo.width / 2, -geo.height / 2);
 
-  if (shadow !== "none") {
-    ctx.save();
-    applyShadow(ctx, shadow, geo.height * pxScale * place.scale);
+  paintShadows(ctx, shadow, geo.height * pxScale * place.scale, () => {
     if (spec.style === "custom" && spec.frame) {
       // Custom artwork: the shadow follows the image's own outline.
       ctx.drawImage(spec.frame, 0, 0, geo.width, geo.height);
@@ -170,8 +193,7 @@ function drawOne(
       ctx.fillStyle = "#000";
       ctx.fill();
     }
-    ctx.restore();
-  }
+  });
 
   drawDevice(
     ctx,
