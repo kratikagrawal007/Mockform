@@ -1,26 +1,136 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Theme is driven by data-theme on <html>. Dark is the default. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ---------- Design tokens ---------- */
+:root,
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --mf-workspace: #0e0e10;
+  --mf-grid-dot: rgb(255 255 255 / 0.07);
+  --mf-panel: rgb(26 26 29 / 0.78);
+  --mf-panel-solid: #1a1a1d;
+  --mf-raised: #242428;
+  --mf-hover: rgb(255 255 255 / 0.06);
+  --mf-active: rgb(255 255 255 / 0.1);
+  --mf-hairline: rgb(255 255 255 / 0.08);
+  --mf-border-strong: rgb(255 255 255 / 0.14);
+
+  --mf-text: #f3f2ef;
+  --mf-text-muted: #a3a1a8;
+  --mf-text-faint: #8a8890;
+
+  --mf-accent: #7c5cff;
+  --mf-accent-hover: #8d71ff;
+  --mf-accent-soft: rgb(124 92 255 / 0.16);
+  --mf-on-accent: #ffffff;
+
+  --mf-shadow-panel:
+    0 1px 0 rgb(255 255 255 / 0.04) inset, 0 12px 32px -12px rgb(0 0 0 / 0.6);
+  --mf-shadow-canvas: 0 30px 80px -20px rgb(0 0 0 / 0.7);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --mf-workspace: #faf8f5;
+  --mf-grid-dot: rgb(20 18 14 / 0.09);
+  --mf-panel: rgb(255 255 255 / 0.8);
+  --mf-panel-solid: #ffffff;
+  --mf-raised: #f2efea;
+  --mf-hover: rgb(20 18 14 / 0.05);
+  --mf-active: rgb(20 18 14 / 0.08);
+  --mf-hairline: rgb(20 18 14 / 0.08);
+  --mf-border-strong: rgb(20 18 14 / 0.16);
+
+  --mf-text: #16151a;
+  --mf-text-muted: #5f5d66;
+  --mf-text-faint: #75737c;
+
+  --mf-accent: #6d4aff;
+  --mf-accent-hover: #5c38f5;
+  --mf-accent-soft: rgb(109 74 255 / 0.1);
+  --mf-on-accent: #ffffff;
+
+  --mf-shadow-panel:
+    0 12px 32px -14px rgb(40 30 10 / 0.18), 0 1px 2px rgb(40 30 10 / 0.06);
+  --mf-shadow-canvas: 0 30px 70px -24px rgb(40 30 10 / 0.3);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-workspace: var(--mf-workspace);
+  --color-panel: var(--mf-panel);
+  --color-panel-solid: var(--mf-panel-solid);
+  --color-raised: var(--mf-raised);
+  --color-hover: var(--mf-hover);
+  --color-active: var(--mf-active);
+  --color-hairline: var(--mf-hairline);
+  --color-border-strong: var(--mf-border-strong);
+  --color-ink: var(--mf-text);
+  --color-muted: var(--mf-text-muted);
+  --color-faint: var(--mf-text-faint);
+  --color-accent: var(--mf-accent);
+  --color-accent-hover: var(--mf-accent-hover);
+  --color-accent-soft: var(--mf-accent-soft);
+  --color-on-accent: var(--mf-on-accent);
+
+  --shadow-panel: var(--mf-shadow-panel);
+  --shadow-canvas: var(--mf-shadow-canvas);
+
+  --radius-panel: 16px;
+  --radius-control: 10px;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --text-ui: 13px;
+  --text-ui--line-height: 18px;
+  --text-label: 11px;
+  --text-label--line-height: 14px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ---------- Base ---------- */
+html,
+body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--mf-workspace);
+  color: var(--mf-text);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 18px;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--mf-accent);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--mf-accent-soft);
+}
+
+/* Dot grid that fades out towards the edges of the workspace. */
+.mf-dot-grid {
+  background-image: radial-gradient(var(--mf-grid-dot) 1px, transparent 1px);
+  background-size: 18px 18px;
+  mask-image: radial-gradient(
+    ellipse 75% 70% at 50% 50%,
+    #000 40%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

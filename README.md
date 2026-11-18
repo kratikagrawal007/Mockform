@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mockform
 
-## Getting Started
+Turn screenshots into polished device mockups, right in your browser.
 
-First, run the development server:
+Drop in a screenshot, pick a device, tune the scene and export. Everything runs locally: no accounts, no uploads, and nothing leaves your machine.
+
+## Status
+
+Mockform is in active development. You can already:
+
+- Add screenshots by clicking, dragging and dropping (onto a specific device, too), pasting, or pressing ⌘O. PNG, JPG or WebP, up to 50 MB; several at once fill a layout's devices in order
+- Choose from 25 original devices (phones, tablets, laptops, desktops, a watch, browser and app windows, frameless and a spatial glass panel), each with colour options, or upload your own frame: Mockform finds the transparent screen automatically
+- Arrange up to three devices with the Solo, Duo, Stack, Fan, Laptop + Phone and Phone + Tablet layouts
+- Drag, scale and rotate devices on the canvas with snapping guides, nudge with the arrow keys, and crop or zoom each screenshot inside its screen
+- Pick a canvas size or one of 13 social presets, or start from one of 5 showcase scenes
+- Use a solid, gradient, image or transparent background, or let Match colors build a gradient from your screenshot
+- Export PNG or JPG at 1×, 2× or 3×, with an optional transparent background, or copy to the clipboard
+- Undo and redo every change; your session is saved in the browser and restored when you come back
+
+Perspective angles and video arrive next.
+
+## Getting started
+
+Requires Node 20.9 or newer.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command             | What it does                                       |
+| ------------------- | -------------------------------------------------- |
+| `npm run dev`       | Start the development server                       |
+| `npm run build`     | Build a static export into `out/`                  |
+| `npm start`         | Serve the static build on http://localhost:3100    |
+| `npm run typecheck` | Type-check with TypeScript                         |
+| `npm run lint`      | Lint with ESLint                                   |
+| `npm run format`    | Format with Prettier                               |
+| `npm test`          | Run unit tests with Vitest                         |
+| `npm run test:e2e`  | Build, serve and run end-to-end tests (Playwright) |
 
-## Learn More
+## Tech stack
 
-To learn more about Next.js, take a look at the following resources:
+Next.js (App Router, static export), React, TypeScript, Tailwind CSS, Zustand, Lucide icons, Vitest and Playwright. The UI uses the Geist and Geist Mono typefaces, bundled at build time.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/app/              App entry, layout, global styles and design tokens
+src/components/ui/    Reusable UI primitives
+src/components/editor/ Editor: top bar, panels, stage, export menu, import handling
+src/editor/           Framework-free core: scene model, undo history, devices,
+                      renderer, import, export
+src/lib/              Small helpers (theme)
+e2e/                  End-to-end tests
+```
 
-## Deploy on Vercel
+## Privacy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Mockform processes every image in your browser. Your screenshots are never uploaded.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+[MIT](LICENSE) © 2026 Kratik Agrawal
