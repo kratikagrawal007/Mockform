@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, Copy, Download } from "lucide-react";
+import { ChevronDown, Copy, Download, Film } from "lucide-react";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Switch } from "@/components/ui/Switch";
@@ -12,13 +12,37 @@ import {
 } from "@/editor/export/exportImage";
 import { exportSize } from "@/editor/export/limits";
 import {
+  useAssets,
   useResolved,
+  useScene,
   useUI,
   type ExportFormat,
   type ExportSettings,
 } from "@/editor/store/editor";
+import {
+  MAX_VIDEO_SECONDS,
+  VIDEO_RESOLUTIONS,
+  formatTime,
+  sceneMediaIds,
+  timelineRange,
+  videoSize,
+} from "@/editor/video/timeline";
 
 const noop = () => () => {};
+
+/** Video facts for the current scene, or null when it has no video. */
+function useVideoInfo() {
+  const ids = useScene((s) => sceneMediaIds(s).join("|"));
+  const timeline = useScene((s) => s.timeline);
+  const images = useAssets((s) => s.images);
+  const durations = ids
+    .split("|")
+    .map((id) => images[id])
+    .filter((a) => a?.media === "video")
+    .map((a) => a.duration ?? 0);
+  if (!durations.length) return null;
+  return timelineRange(timeline, durations);
+}
 
 /** Split button: the main half exports with the last settings, the chevron opens the options. */
 export function ExportMenu() {
@@ -27,8 +51,13 @@ export function ExportMenu() {
   const settings = useUI((s) => s.exportSettings);
   const setSettings = useUI((s) => s.setExportSettings);
   const { canvas } = useResolved();
-  const size = exportSize(canvas, settings.scale);
+  const video = useVideoInfo();
   const clipboard = useSyncExternalStore(noop, canCopyImage, () => false);
+  // A saved "video" choice only applies while the scene has a video.
+  const format: ExportFormat =
+    settings.format === "video" && !video ? "png" : settings.format;
+  const size = exportSize(canvas, settings.scale);
+  const vSize = videoSize(canvas, settings.videoResolution);
 
   useEffect(() => {
     if (!open) return;
@@ -46,15 +75,18 @@ export function ExportMenu() {
     };
   }, [open]);
 
-  const formatLabel = settings.format === "png" ? "PNG" : "JPG";
+  const formatLabel =
+    format === "png" ? "PNG" : format === "jpeg" ? "JPG" : "video";
+  const run = () => void downloadExport({ ...settings, format });
+  const ready = format === "video" ? (video?.exportLength ?? 0) > 0 : size.ok;
 
   return (
     <div ref={rootRef} className="relative ml-2">
       <div className="flex h-9 items-stretch overflow-hidden rounded-[12px] bg-accent text-on-accent shadow-[0_6px_16px_-6px_var(--mf-accent)]">
         <button
           type="button"
-          onClick={() => void downloadExport()}
-          title={`Export ${formatLabel} ${settings.scale}× (⌘E)`}
+          onClick={run}
+          title={`Export ${formatLabel} (⌘E)`}
           className="flex items-center gap-1.5 pr-2.5 pl-3 text-ui font-semibold transition-colors hover:bg-accent-hover"
         >
           <Download className="size-4" aria-hidden />
@@ -86,69 +118,113 @@ export function ExportMenu() {
             <p className="text-label font-medium text-muted">Format</p>
             <SegmentedControl<ExportFormat>
               label="Format"
-              value={settings.format}
+              value={format}
               options={[
                 { value: "png", label: "PNG" },
                 { value: "jpeg", label: "JPG" },
+                ...(video ? [{ value: "video" as const, label: "Video" }] : []),
               ]}
-              onChange={(format) => setSettings({ format })}
+              onChange={(f) => setSettings({ format: f })}
             />
           </div>
-          <div className="space-y-1.5">
-            <p className="text-label font-medium text-muted">Size</p>
-            <SegmentedControl<"1" | "2" | "3">
-              label="Size"
-              value={String(settings.scale) as "1" | "2" | "3"}
-              options={[
-                { value: "1", label: "1×" },
-                { value: "2", label: "2×" },
-                { value: "3", label: "3×" },
-              ]}
-              onChange={(v) =>
-                setSettings({ scale: Number(v) as ExportSettings["scale"] })
-              }
-            />
-          </div>
-          {settings.format === "jpeg" ? (
-            <ValueSlider
-              label="Quality"
-              value={settings.quality}
-              min={0.5}
-              max={1}
-              step={0.01}
-              defaultValue={0.92}
-              format={(v) => `${Math.round(v * 100)}%`}
-              onChange={(quality) => setSettings({ quality })}
-            />
-          ) : (
-            <Switch
-              label="Transparent background"
-              checked={settings.transparent}
-              onChange={(transparent) => setSettings({ transparent })}
-            />
-          )}
 
-          <p
-            className={`font-mono text-label tabular-nums ${size.ok ? "text-faint" : "text-[#ff6b5e]"}`}
-            data-testid="export-size"
-          >
-            {size.ok ? `${size.width} × ${size.height} px` : size.message}
-          </p>
+          {format === "video" && video ? (
+            <>
+              <div className="space-y-1.5">
+                <p className="text-label font-medium text-muted">Resolution</p>
+                <SegmentedControl<"480" | "720" | "1080">
+                  label="Resolution"
+                  value={
+                    String(settings.videoResolution) as "480" | "720" | "1080"
+                  }
+                  options={VIDEO_RESOLUTIONS.map((r) => ({
+                    value: String(r) as "480" | "720" | "1080",
+                    label: `${r}p`,
+                  }))}
+                  onChange={(v) =>
+                    setSettings({
+                      videoResolution: Number(
+                        v,
+                      ) as ExportSettings["videoResolution"],
+                    })
+                  }
+                />
+              </div>
+              <p
+                className="font-mono text-label text-faint tabular-nums"
+                data-testid="export-size"
+              >
+                {vSize.width} × {vSize.height} px ·{" "}
+                {formatTime(video.exportLength)} · 30 fps
+              </p>
+              <p className="text-label text-faint">
+                MP4 where your browser supports it, otherwise WebM. Silent.
+                {video.length > MAX_VIDEO_SECONDS &&
+                  ` Capped at ${MAX_VIDEO_SECONDS} s.`}
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                <p className="text-label font-medium text-muted">Size</p>
+                <SegmentedControl<"1" | "2" | "3">
+                  label="Size"
+                  value={String(settings.scale) as "1" | "2" | "3"}
+                  options={[
+                    { value: "1", label: "1×" },
+                    { value: "2", label: "2×" },
+                    { value: "3", label: "3×" },
+                  ]}
+                  onChange={(v) =>
+                    setSettings({ scale: Number(v) as ExportSettings["scale"] })
+                  }
+                />
+              </div>
+              {format === "jpeg" ? (
+                <ValueSlider
+                  label="Quality"
+                  value={settings.quality}
+                  min={0.5}
+                  max={1}
+                  step={0.01}
+                  defaultValue={0.92}
+                  format={(v) => `${Math.round(v * 100)}%`}
+                  onChange={(quality) => setSettings({ quality })}
+                />
+              ) : (
+                <Switch
+                  label="Transparent background"
+                  checked={settings.transparent}
+                  onChange={(transparent) => setSettings({ transparent })}
+                />
+              )}
+              <p
+                className={`font-mono text-label tabular-nums ${size.ok ? "text-faint" : "text-[#ff6b5e]"}`}
+                data-testid="export-size"
+              >
+                {size.ok ? `${size.width} × ${size.height} px` : size.message}
+              </p>
+            </>
+          )}
 
           <div className="flex gap-2">
             <button
               type="button"
-              disabled={!size.ok}
+              disabled={!ready}
               onClick={() => {
                 setOpen(false);
-                void downloadExport();
+                run();
               }}
               className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-control)] bg-accent text-ui font-semibold text-on-accent hover:bg-accent-hover disabled:opacity-40"
             >
-              <Download className="size-4" aria-hidden />
-              Download {formatLabel}
+              {format === "video" ? (
+                <Film className="size-4" aria-hidden />
+              ) : (
+                <Download className="size-4" aria-hidden />
+              )}
+              {format === "video" ? "Export video" : `Download ${formatLabel}`}
             </button>
-            {clipboard && (
+            {clipboard && format !== "video" && (
               <button
                 type="button"
                 disabled={!size.ok}

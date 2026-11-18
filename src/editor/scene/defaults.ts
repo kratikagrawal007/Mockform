@@ -26,6 +26,7 @@ export function createDevice(
     scale: 1,
     rotation: 0,
     glare: true,
+    perspective: "flat",
     screenshotId: null,
     crop: { ...DEFAULT_CROP },
     ...patch,
@@ -46,9 +47,11 @@ export function createScene(): Scene {
       gradientId: DEFAULT_GRADIENT_ID,
       matched: null,
       imageId: null,
+      videoId: null,
     },
     layout: "solo",
     devices: [createDevice(DEFAULT_DEVICE_ID)],
     shadow: "medium",
+    timeline: { start: 0, end: null },
   };
 }

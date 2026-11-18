@@ -6,10 +6,19 @@ import {
   type ExportSettings,
 } from "@/editor/store/editor";
 import { toast } from "@/editor/toasts";
+import {
+  lockPlayback,
+  play,
+  sceneVideos,
+  usePlayback,
+} from "@/editor/video/playback";
+import { ExportCancelled, exportVideo } from "./exportVideo";
 import { exportFileName, exportSize } from "./limits";
 
 /** Renders the scene offscreen at the requested size. No editor UI is ever included. */
-export async function renderToBlob(settings: ExportSettings) {
+export async function renderToBlob(
+  settings: ExportSettings & { format: "png" | "jpeg" },
+) {
   const scene = getScene();
   const resolved = getResolved();
   const size = exportSize(resolved.canvas, settings.scale);
@@ -43,17 +52,59 @@ export async function renderToBlob(settings: ExportSettings) {
   return { blob, name: exportFileName(size, settings.format) };
 }
 
+function saveBlob(blob: Blob, name: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
+}
+
+/* ---------- Video export progress (shown as a modal) ---------- */
+
+let videoAbort: AbortController | null = null;
+
+export function cancelVideoExport() {
+  videoAbort?.abort();
+}
+
+async function downloadVideo(settings: ExportSettings) {
+  if (videoAbort) return;
+  videoAbort = new AbortController();
+  const wasPlaying = usePlayback.getState().playing;
+  useUI.getState().setVideoProgress(0);
+  try {
+    const { blob, name } = await exportVideo(
+      settings.videoResolution,
+      (p) => useUI.getState().setVideoProgress(p),
+      videoAbort.signal,
+    );
+    saveBlob(blob, name);
+    useUI.getState().markExported();
+    toast(`Saved ${name}`);
+  } catch (e) {
+    if (e instanceof ExportCancelled) toast("Video export cancelled");
+    else
+      toast(e instanceof Error ? e.message : "Video export failed.", "error");
+  } finally {
+    videoAbort = null;
+    useUI.getState().setVideoProgress(null);
+    lockPlayback(false);
+    if (wasPlaying) play();
+  }
+}
+
 export async function downloadExport(
   settings = useUI.getState().exportSettings,
 ) {
+  // "Video" only applies while the scene has a video; otherwise fall back to PNG.
+  if (settings.format === "video" && sceneVideos().length)
+    return downloadVideo(settings);
+  const format = settings.format === "video" ? "png" : settings.format;
   try {
-    const { blob, name } = await renderToBlob(settings);
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = name;
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 10_000);
+    const { blob, name } = await renderToBlob({ ...settings, format });
+    saveBlob(blob, name);
     useUI.getState().markExported();
     toast(`Saved ${name}`);
   } catch (e) {

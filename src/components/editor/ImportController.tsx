@@ -11,6 +11,7 @@ import {
 } from "@/editor/import/importScreenshot";
 import { ACCEPTED_TYPES } from "@/editor/import/validate";
 import { useEditor, useUI } from "@/editor/store/editor";
+import { play } from "@/editor/video/playback";
 import { deviceKeyAt } from "./Stage";
 
 function isEditableTarget(t: EventTarget | null) {
@@ -24,12 +25,15 @@ async function importBackground(files: FileList) {
   const file = files[0];
   if (!file) return;
   const asset = await loadImageAsset(file, "background");
-  if (asset) {
-    useEditor.getState().update((s) => ({
-      ...s,
-      background: { ...s.background, kind: "image", imageId: asset.id },
-    }));
-  }
+  if (!asset) return;
+  const isVideo = asset.media === "video";
+  useEditor.getState().update((s) => ({
+    ...s,
+    background: isVideo
+      ? { ...s.background, kind: "video", videoId: asset.id }
+      : { ...s.background, kind: "image", imageId: asset.id },
+  }));
+  if (isVideo) play();
 }
 
 async function addFrame(files: FileList) {
@@ -37,6 +41,11 @@ async function addFrame(files: FileList) {
   if (!file) return;
   const id = await importFrame(file);
   if (id) selectDevice(id);
+}
+
+/** New videos start playing so the preview is alive straight away. */
+function startIfVideo(added: boolean) {
+  if (added) play();
 }
 
 /** Handles the file pickers, drag and drop anywhere on the page, and paste. */
@@ -79,14 +88,15 @@ export function ImportController() {
       // Dropping onto a device fills that device.
       const key = deviceKeyAt(e.clientX, e.clientY);
       if (key) useUI.getState().select(key);
-      if (e.dataTransfer) void importScreenshots(e.dataTransfer.files);
+      if (e.dataTransfer)
+        void importScreenshots(e.dataTransfer.files).then(startIfVideo);
     };
     const onPaste = (e: ClipboardEvent) => {
       if (isEditableTarget(e.target)) return;
       const files = e.clipboardData?.files;
       if (files && files.length > 0) {
         e.preventDefault();
-        void importScreenshots(files);
+        void importScreenshots(files).then(startIfVideo);
       }
     };
 
@@ -119,7 +129,8 @@ export function ImportController() {
         data-testid="file-input"
         onChange={(e) => {
           const files = e.currentTarget.files;
-          if (files) void importScreenshots(Array.from(files));
+          if (files)
+            void importScreenshots(Array.from(files)).then(startIfVideo);
           reset(e);
         }}
       />
@@ -152,10 +163,11 @@ export function ImportController() {
           <div className="flex flex-col items-center gap-3 rounded-[20px] border-2 border-dashed border-accent bg-panel-solid px-10 py-8 shadow-panel">
             <ImagePlus className="size-7 text-accent" aria-hidden />
             <p className="text-[15px] font-semibold">
-              Drop to add your screenshots
+              Drop to add screenshots or videos
             </p>
             <p className="text-muted">
-              Drop on a device to fill it · PNG, JPG or WebP, up to 50 MB
+              Drop on a device to fill it · images up to 50 MB, videos up to 200
+              MB
             </p>
           </div>
         </div>

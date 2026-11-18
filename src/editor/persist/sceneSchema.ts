@@ -7,6 +7,7 @@ import {
 } from "@/editor/canvas";
 import { LAYOUTS } from "@/editor/layouts";
 import { MAX_ZOOM, clamp } from "@/editor/render/geometry";
+import { PERSPECTIVES, type PerspectiveId } from "@/editor/render/perspective";
 import {
   DEFAULT_CROP,
   MAX_DEVICES,
@@ -78,6 +79,11 @@ function parseDevice(
     scale: num(v.scale, 1, 0.1, 3),
     rotation: num(v.rotation, 0, -180, 180),
     glare: typeof v.glare === "boolean" ? v.glare : true,
+    perspective: oneOf<PerspectiveId>(
+      v.perspective,
+      PERSPECTIVES.map((p) => p.id),
+      "flat",
+    ),
     screenshotId: idOrNull(v.screenshotId),
     crop: {
       zoom: num(crop.zoom, DEFAULT_CROP.zoom, 1, MAX_ZOOM),
@@ -95,7 +101,7 @@ function migrateV1(v: Obj): Obj {
     ...v,
     version: 2,
     layout: "solo",
-    background: { ...bg, matched: null, imageId: null },
+    background: { ...bg, matched: null, imageId: null, videoId: null },
     devices: [
       {
         deviceId: d.deviceId,
@@ -126,6 +132,7 @@ export function parseScene(
   const canvas = isObj(v.canvas) ? v.canvas : {};
   const custom = isObj(canvas.custom) ? canvas.custom : {};
   const bg = isObj(v.background) ? v.background : {};
+  const timeline = isObj(v.timeline) ? v.timeline : {};
   const devices = (Array.isArray(v.devices) ? v.devices : [])
     .slice(0, MAX_DEVICES)
     .map((d) => parseDevice(d, isKnownDevice))
@@ -168,6 +175,7 @@ export function parseScene(
           : oneOf(bg.gradientId, gradientIds, def.background.gradientId),
       matched,
       imageId: idOrNull(bg.imageId),
+      videoId: idOrNull(bg.videoId),
     },
     layout: oneOf<LayoutId>(
       v.layout,
@@ -180,6 +188,13 @@ export function parseScene(
       ["none", "soft", "medium", "strong"],
       def.shadow,
     ),
+    timeline: {
+      start: num(timeline.start, 0, 0, 36_000),
+      end:
+        timeline.end === null || timeline.end === undefined
+          ? null
+          : num(timeline.end, 0, 0, 36_000),
+    },
   };
 }
 

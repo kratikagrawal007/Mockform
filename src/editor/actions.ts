@@ -88,7 +88,7 @@ export function matchColors() {
     );
     return;
   }
-  const matched = matchGradient(image.bitmap, image.width, image.height);
+  const matched = matchGradient(image.source, image.width, image.height);
   useEditor.getState().update((s) => ({
     ...s,
     background: {

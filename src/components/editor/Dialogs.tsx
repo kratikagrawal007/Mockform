@@ -61,7 +61,7 @@ export function Dialogs() {
             platform names in the size presets only describe dimensions.
           </p>
           <p className="border-t border-hairline pt-3 text-label text-faint">
-            Version 0.2 · © 2026 Kratik Agrawal · MIT licence
+            Version 0.4 · © 2026 Kratik Agrawal · MIT licence
           </p>
         </div>
       </Dialog>

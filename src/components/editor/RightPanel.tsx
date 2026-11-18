@@ -9,7 +9,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { ComingSoon, Panel, PanelSection } from "@/components/ui/Panel";
+import { Panel, PanelSection } from "@/components/ui/Panel";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { Switch } from "@/components/ui/Switch";
 import { ValueSlider } from "@/components/ui/ValueSlider";
@@ -37,6 +37,8 @@ import { hasGlass } from "@/editor/devices/draw";
 import { useFrames } from "@/editor/frames/frames";
 import { openPicker } from "@/editor/import/importScreenshot";
 import { MAX_ZOOM } from "@/editor/render/geometry";
+import { formatTime } from "@/editor/video/timeline";
+import { MediaThumb, PerspectiveSection, VideoSection } from "./MediaControls";
 import { DEFAULT_CROP } from "@/editor/scene/defaults";
 import type {
   BackgroundKind,
@@ -190,10 +192,8 @@ function ScreenshotSection({ device }: { device: DeviceInstance }) {
       {shot ? (
         <div className="space-y-2">
           <div className="flex items-center gap-2.5 rounded-[var(--radius-control)] bg-raised p-2">
-            {/* eslint-disable-next-line @next/next/no-img-element -- local object URL, nothing to optimise */}
-            <img
-              src={shot.previewUrl}
-              alt=""
+            <MediaThumb
+              asset={shot}
               className="h-11 w-11 shrink-0 rounded-md object-cover object-top"
             />
             <div className="min-w-0 flex-1">
@@ -202,6 +202,8 @@ function ScreenshotSection({ device }: { device: DeviceInstance }) {
               </p>
               <p className="font-mono text-label text-faint tabular-nums">
                 {shot.width} × {shot.height}
+                {shot.media === "video" &&
+                  ` · ${formatTime(shot.duration ?? 0)}`}
               </p>
             </div>
             <button
@@ -272,7 +274,7 @@ function ScreenshotSection({ device }: { device: DeviceInstance }) {
             Add screenshot
           </button>
           <p className="mt-2 text-center text-label text-faint">
-            or drop, paste, or press ⌘O
+            Image or video · or drop, paste, or press ⌘O
           </p>
         </>
       )}
@@ -411,6 +413,7 @@ const bgOptions = [
   { value: "solid", label: "Solid" },
   { value: "gradient", label: "Gradient" },
   { value: "image", label: "Image" },
+  { value: "video", label: "Video" },
   { value: "none", label: "None" },
 ] as const;
 
@@ -445,7 +448,7 @@ function Swatch({
 
 function BackgroundSection() {
   const bg = useScene((s) => s.background);
-  const bgImage = useImage(bg.imageId);
+  const bgImage = useImage(bg.kind === "video" ? bg.videoId : bg.imageId);
   const setBg = (patch: Partial<Scene["background"]>, key?: string) =>
     update((s) => ({ ...s, background: { ...s.background, ...patch } }), key);
 
@@ -533,13 +536,11 @@ function BackgroundSection() {
             </label>
           </div>
         )}
-        {bg.kind === "image" &&
+        {(bg.kind === "image" || bg.kind === "video") &&
           (bgImage ? (
             <div className="flex items-center gap-2.5 rounded-[var(--radius-control)] bg-raised p-2">
-              {/* eslint-disable-next-line @next/next/no-img-element -- local object URL */}
-              <img
-                src={bgImage.previewUrl}
-                alt=""
+              <MediaThumb
+                asset={bgImage}
                 className="h-11 w-14 shrink-0 rounded-md object-cover"
               />
               <p className="min-w-0 flex-1 truncate text-label font-medium">
@@ -547,7 +548,7 @@ function BackgroundSection() {
               </p>
               <button
                 type="button"
-                aria-label="Replace background image"
+                aria-label={`Replace background ${bg.kind}`}
                 onClick={() => openPicker("background")}
                 className="grid size-7 place-items-center rounded-md text-muted hover:bg-hover hover:text-ink"
               >
@@ -561,7 +562,7 @@ function BackgroundSection() {
               className="flex h-9 w-full items-center justify-center gap-2 rounded-[var(--radius-control)] border border-hairline bg-raised text-ui font-medium hover:bg-hover"
             >
               <ImagePlus className="size-4" aria-hidden />
-              Choose background image
+              Choose background {bg.kind}
             </button>
           ))}
         {bg.kind === "none" && (
@@ -605,11 +606,10 @@ export function RightPanel() {
       <DeviceTabs />
       <ScreenshotSection device={device} />
       <MockupSection device={device} />
+      <PerspectiveSection device={device} />
+      <VideoSection />
       <BackgroundSection />
       <ShadowSection />
-      <PanelSection title="Perspective" defaultOpen={false}>
-        <ComingSoon>Angled views arrive in Phase 4.</ComingSoon>
-      </PanelSection>
     </Panel>
   );
 }

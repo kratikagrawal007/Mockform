@@ -90,10 +90,14 @@ export function updateDevice(
 export interface ImageAsset {
   id: string;
   kind: "screenshot" | "background";
+  media: "image" | "video";
   name: string;
   width: number;
   height: number;
-  bitmap: ImageBitmap;
+  /** Video length in seconds (videos only). */
+  duration?: number;
+  /** What canvases draw: a decoded image, or a muted <video> element. */
+  source: ImageBitmap | HTMLVideoElement;
   /** The original file, kept so the session can be saved and restored. */
   blob: Blob;
   /** Object URL of the original file, for thumbnails. */
@@ -116,7 +120,7 @@ export function useImage(id: string | null | undefined): ImageAsset | null {
 
 /* ---------- Session UI state (not undoable) ---------- */
 
-export type ExportFormat = "png" | "jpeg";
+export type ExportFormat = "png" | "jpeg" | "video";
 
 export interface ExportSettings {
   format: ExportFormat;
@@ -124,6 +128,8 @@ export interface ExportSettings {
   /** JPG quality, 0.5–1. */
   quality: number;
   transparent: boolean;
+  /** Shorter side of a video export, in pixels. */
+  videoResolution: 480 | 720 | 1080;
 }
 
 export type DialogId = "shortcuts" | "about" | null;
@@ -135,6 +141,9 @@ interface UIStore {
   exportSettings: ExportSettings;
   deviceTouched: boolean;
   exported: boolean;
+  /** 0–1 while a video export runs, otherwise null. */
+  videoProgress: number | null;
+  setVideoProgress: (p: number | null) => void;
   select: (key: string | null) => void;
   setCropping: (on: boolean) => void;
   openDialog: (d: DialogId) => void;
@@ -152,9 +161,12 @@ export const useUI = create<UIStore>()((set) => ({
     scale: 2,
     quality: 0.92,
     transparent: false,
+    videoResolution: 1080,
   },
   deviceTouched: false,
   exported: false,
+  videoProgress: null,
+  setVideoProgress: (videoProgress) => set({ videoProgress }),
   select: (selectedKey) =>
     set((s) => ({
       selectedKey,
@@ -228,7 +240,9 @@ export function resolveScene(
     scene.canvas.preset === "custom"
       ? (scene.canvas.custom.label ?? preset.name)
       : preset.name;
-  const bgId = scene.background.imageId;
+  const bg = scene.background;
+  const bgId =
+    bg.kind === "video" ? bg.videoId : bg.kind === "image" ? bg.imageId : null;
   return {
     canvas: { name, ...size },
     devices,

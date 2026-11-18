@@ -8,16 +8,16 @@ Drop in a screenshot, pick a device, tune the scene and export. Everything runs 
 
 Mockform is in active development. You can already:
 
-- Add screenshots by clicking, dragging and dropping (onto a specific device, too), pasting, or pressing ⌘O. PNG, JPG or WebP, up to 50 MB; several at once fill a layout's devices in order
+- Add screenshots or screen recordings by clicking, dragging and dropping (onto a specific device, too), pasting, or pressing ⌘O. PNG, JPG or WebP up to 50 MB; MP4, WebM or MOV up to 200 MB. Several at once fill a layout's devices in order
 - Choose from 25 original devices (phones, tablets, laptops, desktops, a watch, browser and app windows, frameless and a spatial glass panel), each with colour options, or upload your own frame: Mockform finds the transparent screen automatically
 - Arrange up to three devices with the Solo, Duo, Stack, Fan, Laptop + Phone and Phone + Tablet layouts
 - Drag, scale and rotate devices on the canvas with snapping guides, nudge with the arrow keys, and crop or zoom each screenshot inside its screen
 - Pick a canvas size or one of 13 social presets, or start from one of 5 showcase scenes
-- Use a solid, gradient, image or transparent background, or let Match colors build a gradient from your screenshot
+- Tilt each device to one of five perspective angles (rendered with WebGL2, flat where it's unavailable)
+- Use a solid, gradient, image, video or transparent background, or let Match colors build a gradient from your screenshot
+- Play videos in sync, trim them, and export a silent MP4 (or WebM) at 480p, 720p or 1080p, up to 60 seconds
 - Export PNG or JPG at 1×, 2× or 3×, with an optional transparent background, or copy to the clipboard
 - Undo and redo every change; your session is saved in the browser and restored when you come back
-
-Perspective angles and video arrive next.
 
 ## Getting started
 

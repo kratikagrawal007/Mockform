@@ -91,6 +91,10 @@ export function Stage() {
   const selPlace = placements[selectedIndex];
 
   /* ---------- Drawing ---------- */
+  const hasVideo =
+    resolved.devices.some((d) => d.image?.media === "video") ||
+    resolved.backgroundImage?.media === "video";
+
   useEffect(() => {
     const el = canvasRef.current;
     const ctx = el?.getContext("2d");
@@ -98,16 +102,28 @@ export function Stage() {
     const dpr = window.devicePixelRatio || 1;
     el.width = Math.round(fit.width * dpr);
     el.height = Math.round(fit.height * dpr);
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, el.width, el.height);
-    renderScene(ctx, {
-      scene,
-      resolved,
-      pxScale: (fit.width * dpr) / canvas.width,
-    });
+    const draw = () => {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, el.width, el.height);
+      renderScene(ctx, {
+        scene,
+        resolved,
+        pxScale: (fit.width * dpr) / canvas.width,
+      });
+    };
+    draw();
+    if (!hasVideo) return;
+    // Videos change every frame, so keep redrawing while any are on the canvas.
+    let raf = 0;
+    const loop = () => {
+      draw();
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
     // resolved is derived from scene + images, which are already dependencies.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scene, images, fit.width, fit.height, canvas.width]);
+  }, [scene, images, fit.width, fit.height, canvas.width, hasVideo]);
 
   /* ---------- Hit testing ---------- */
   const toCanvas = (clientX: number, clientY: number) => {
@@ -447,7 +463,9 @@ function DropPrompt({
       }}
     >
       {!small && <ImagePlus className="size-5 shrink-0" aria-hidden />}
-      {!small && <span className="text-ui font-medium">Drop a screenshot</span>}
+      {!small && (
+        <span className="text-ui font-medium">Drop a screenshot or video</span>
+      )}
       {!small && (
         <span className="font-mono text-label text-white/55 tabular-nums">
           {d.geo.nativeScreen.width} × {d.geo.nativeScreen.height} px

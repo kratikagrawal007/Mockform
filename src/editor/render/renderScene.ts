@@ -1,8 +1,14 @@
 import { backgroundGradient } from "@/editor/backgrounds";
 import { drawDevice, traceSilhouette } from "@/editor/devices/draw";
-import type { Resolved, ResolvedDevice } from "@/editor/store/editor";
+import type {
+  ImageAsset,
+  Resolved,
+  ResolvedDevice,
+} from "@/editor/store/editor";
 import type { BackgroundState, ShadowPreset, Size } from "@/editor/scene/types";
-import { coverRect, placeDevice } from "./geometry";
+import { coverRect, placeDevice, type Placement } from "./geometry";
+import { getPerspective, projectCorners } from "./perspective";
+import { maxTextureSize, projectImage, webglAvailable } from "./webglProject";
 
 type Ctx = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
 
@@ -29,7 +35,7 @@ export function drawBackground(
     ctx.fillRect(0, 0, width, height);
     return;
   }
-  if (bg.kind === "image") {
+  if (bg.kind === "image" || bg.kind === "video") {
     if (!image) {
       ctx.fillStyle = "#1a1a1d";
       ctx.fillRect(0, 0, width, height);
@@ -59,6 +65,83 @@ export function drawBackground(
   }
 }
 
+/** Applies the drop shadow for a device, sized in output pixels (canvas shadows ignore transforms). */
+function applyShadow(ctx: Ctx, shadow: ShadowPreset, deviceHeightPx: number) {
+  if (shadow === "none") return;
+  const sh = SHADOWS[shadow];
+  ctx.shadowColor = `rgba(0,0,0,${sh.alpha})`;
+  ctx.shadowBlur = sh.blur * deviceHeightPx;
+  // The offset points straight down on the canvas regardless of device rotation.
+  ctx.shadowOffsetY = sh.y * deviceHeightPx;
+}
+
+function screenImage(image: ImageAsset | null) {
+  return image
+    ? { source: image.source, width: image.width, height: image.height }
+    : null;
+}
+
+let flatCanvas: HTMLCanvasElement | null = null;
+
+/**
+ * Tilted devices: draw the device flat into an offscreen canvas at output
+ * resolution, project it with WebGL, then composite it. Returns false when
+ * WebGL2 isn't available so the caller draws the device flat instead.
+ */
+function drawTilted(
+  ctx: Ctx,
+  d: ResolvedDevice,
+  place: Placement,
+  shadow: ShadowPreset,
+  pxScale: number,
+) {
+  const persp = getPerspective(d.instance.perspective);
+  if (
+    persp.id === "flat" ||
+    typeof document === "undefined" ||
+    !webglAvailable()
+  )
+    return false;
+  const { spec, geo, color, image, instance } = d;
+  const k = pxScale * place.scale; // output pixels per frame unit
+  const flatK = Math.min(k, maxTextureSize() / Math.max(geo.width, geo.height));
+  flatCanvas ??= document.createElement("canvas");
+  flatCanvas.width = Math.max(1, Math.ceil(geo.width * flatK));
+  flatCanvas.height = Math.max(1, Math.ceil(geo.height * flatK));
+  const fctx = flatCanvas.getContext("2d");
+  if (!fctx) return false;
+  fctx.setTransform(flatK, 0, 0, flatK, 0, 0);
+  drawDevice(
+    fctx,
+    spec,
+    geo,
+    color,
+    screenImage(image),
+    instance.glare,
+    instance.crop,
+  );
+
+  const out = projectImage(
+    flatCanvas,
+    projectCorners(geo.width * k, geo.height * k, persp),
+  );
+  if (!out) return false;
+  ctx.save();
+  ctx.translate(place.cx, place.cy);
+  ctx.rotate(place.rotation);
+  applyShadow(ctx, shadow, geo.height * k);
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(
+    out.canvas,
+    out.x / pxScale,
+    out.y / pxScale,
+    out.width / pxScale,
+    out.height / pxScale,
+  );
+  ctx.restore();
+  return true;
+}
+
 function drawOne(
   ctx: Ctx,
   d: ResolvedDevice,
@@ -68,6 +151,8 @@ function drawOne(
 ) {
   const { spec, geo, color, image, instance } = d;
   const place = placeDevice(geo, canvas, instance);
+  if (drawTilted(ctx, d, place, shadow, pxScale)) return;
+
   ctx.save();
   ctx.translate(place.cx, place.cy);
   ctx.rotate(place.rotation);
@@ -75,14 +160,8 @@ function drawOne(
   ctx.translate(-geo.width / 2, -geo.height / 2);
 
   if (shadow !== "none") {
-    // Canvas shadows ignore the transform, so convert frame units to output pixels.
-    // The offset is applied straight down on the canvas regardless of device rotation.
-    const k = pxScale * place.scale;
-    const sh = SHADOWS[shadow];
     ctx.save();
-    ctx.shadowColor = `rgba(0,0,0,${sh.alpha})`;
-    ctx.shadowBlur = sh.blur * geo.height * k;
-    ctx.shadowOffsetY = sh.y * geo.height * k;
+    applyShadow(ctx, shadow, geo.height * pxScale * place.scale);
     if (spec.style === "custom" && spec.frame) {
       // Custom artwork: the shadow follows the image's own outline.
       ctx.drawImage(spec.frame, 0, 0, geo.width, geo.height);
@@ -99,9 +178,7 @@ function drawOne(
     spec,
     geo,
     color,
-    image
-      ? { source: image.bitmap, width: image.width, height: image.height }
-      : null,
+    screenImage(image),
     instance.glare,
     instance.crop,
   );
@@ -126,18 +203,7 @@ export function renderScene(
   ctx.save();
   ctx.scale(pxScale, pxScale);
   if (!transparent) {
-    drawBackground(
-      ctx,
-      scene.background,
-      canvas,
-      backgroundImage
-        ? {
-            source: backgroundImage.bitmap,
-            width: backgroundImage.width,
-            height: backgroundImage.height,
-          }
-        : null,
-    );
+    drawBackground(ctx, scene.background, canvas, screenImage(backgroundImage));
   }
   for (const d of devices) drawOne(ctx, d, canvas, scene.shadow, pxScale);
   ctx.restore();

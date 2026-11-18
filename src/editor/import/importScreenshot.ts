@@ -8,27 +8,10 @@ import {
   type ImageAsset,
 } from "@/editor/store/editor";
 import { toast } from "@/editor/toasts";
-import { downscaleSize, validateFile } from "./validate";
+import { createMediaAsset } from "./media";
+import { validateFile } from "./validate";
 
-export async function decodeImage(
-  blob: Blob,
-  announce = true,
-): Promise<ImageBitmap> {
-  const bitmap = await createImageBitmap(blob, {
-    imageOrientation: "from-image",
-  });
-  const target = downscaleSize(bitmap.width, bitmap.height);
-  if (!target.scaled) return bitmap;
-  const resized = await createImageBitmap(bitmap, {
-    resizeWidth: target.width,
-    resizeHeight: target.height,
-    resizeQuality: "high",
-  });
-  bitmap.close();
-  if (announce)
-    toast(`Large image scaled down to ${target.width} × ${target.height}.`);
-  return resized;
-}
+export { decodeImage } from "./media";
 
 let counter = 0;
 export function newAssetId(prefix: string) {
@@ -46,21 +29,23 @@ export async function loadImageAsset(
     return null;
   }
   try {
-    const bitmap = await decodeImage(file);
-    const asset: ImageAsset = {
+    const asset = await createMediaAsset(file, {
       id: newAssetId(kind === "screenshot" ? "shot" : "bg"),
       kind,
-      name: file.name || "Pasted image",
-      width: bitmap.width,
-      height: bitmap.height,
-      bitmap,
-      blob: file,
-      previewUrl: URL.createObjectURL(file),
-    };
+      name:
+        file.name ||
+        (check.media === "video" ? "Pasted video" : "Pasted image"),
+      media: check.media,
+    });
     useAssets.getState().add(asset);
     return asset;
   } catch {
-    toast("Couldn't read that image. It may be damaged.", "error");
+    toast(
+      check.media === "video"
+        ? "Couldn't play that video. Try an MP4 (H.264) or WebM file."
+        : "Couldn't read that image. It may be damaged.",
+      "error",
+    );
     return null;
   }
 }
@@ -73,7 +58,9 @@ export async function importScreenshots(
   files: ArrayLike<File>,
 ): Promise<boolean> {
   const list = Array.from(files);
-  const images = list.filter((f) => f.type.startsWith("image/"));
+  const images = list.filter(
+    (f) => f.type.startsWith("image/") || f.type.startsWith("video/"),
+  );
   const candidates = images.length ? images : list.slice(0, 1);
   if (!candidates.length) return false;
 

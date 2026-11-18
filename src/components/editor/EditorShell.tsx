@@ -12,6 +12,7 @@ import { ProgressRail } from "./ProgressRail";
 import { RightPanel } from "./RightPanel";
 import { Stage } from "./Stage";
 import { TopBar } from "./TopBar";
+import { VideoExportProgress } from "./VideoExportProgress";
 
 function useProgressStep() {
   const hasShot = useScene((s) =>
@@ -81,6 +82,7 @@ export function EditorShell() {
 
       <ImportController />
       <Dialogs />
+      <VideoExportProgress />
       <Toaster />
     </div>
   );

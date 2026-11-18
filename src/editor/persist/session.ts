@@ -1,6 +1,6 @@
 import { allDevices } from "@/editor/devices/catalog";
 import { restoreFrames } from "@/editor/frames/frames";
-import { decodeImage } from "@/editor/import/importScreenshot";
+import { createMediaAsset } from "@/editor/import/media";
 import {
   useAssets,
   useEditor,
@@ -21,6 +21,8 @@ const EXPORT_KEY = "mockform:export";
 interface StoredAsset {
   id: string;
   kind: ImageAsset["kind"];
+  /** Missing on assets saved before videos were supported. */
+  media?: ImageAsset["media"];
   name: string;
   blob: Blob;
 }
@@ -53,8 +55,13 @@ export async function restoreSession() {
   if (exportSettings && typeof exportSettings === "object") {
     const e = exportSettings as Partial<ExportSettings>;
     useUI.getState().setExportSettings({
-      ...(e.format === "png" || e.format === "jpeg"
+      ...(e.format === "png" || e.format === "jpeg" || e.format === "video"
         ? { format: e.format }
+        : {}),
+      ...(e.videoResolution === 480 ||
+      e.videoResolution === 720 ||
+      e.videoResolution === 1080
+        ? { videoResolution: e.videoResolution }
         : {}),
       ...(e.scale === 1 || e.scale === 2 || e.scale === 3
         ? { scale: e.scale }
@@ -78,14 +85,13 @@ export async function restoreSession() {
     stored.map(async (s) => {
       if (!wanted.has(s.id)) return idbDelete("assets", s.id);
       try {
-        const bitmap = await decodeImage(s.blob, false);
-        restored.push({
-          ...s,
-          width: bitmap.width,
-          height: bitmap.height,
-          bitmap,
-          previewUrl: URL.createObjectURL(s.blob),
-        });
+        restored.push(
+          await createMediaAsset(
+            s.blob,
+            { id: s.id, kind: s.kind, name: s.name, media: s.media ?? "image" },
+            false,
+          ),
+        );
       } catch {
         await idbDelete("assets", s.id);
       }
