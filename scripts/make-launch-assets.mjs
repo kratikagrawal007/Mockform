@@ -4,34 +4,38 @@
 //   npm run build && npm start      # serves the static build on :3100
 //   npm run assets                  # in another terminal
 //
-// Writes public/icon-192.png, public/icon-512.png, public/apple-icon.png,
+// Writes public/icon-192.png, public/icon-512.png, public/maskable-512.png, public/apple-icon.png,
 // public/og.png and marketing/product-hunt-{1,2,3}.png.
 
 import { chromium } from "@playwright/test";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:3100";
 
 const browser = await chromium.launch();
 await mkdir("marketing", { recursive: true });
 
-/* ---------- Icons: full-bleed squares so platforms can apply their own mask ---------- */
+/* ---------- Icons from the brand kit's light app icon ----------
+   Rounded tiles for browsers and PWAs; full-bleed squares (no corner radius)
+   where the platform applies its own mask (iOS home screen, Android maskable).
+   The symbol sits inside the 80% safe zone, so masking never clips it. */
+const appIcon = await readFile(
+  "public/brand/mockform-app-icon-light.svg",
+  "utf8",
+);
+const fullBleed = appIcon.replace('rx="56"', 'rx="0"');
 const iconPage = await browser.newPage();
-for (const [file, size] of [
-  ["public/icon-512.png", 512],
-  ["public/icon-192.png", 192],
-  ["public/apple-icon.png", 180],
+for (const [file, size, svg] of [
+  ["public/icon-512.png", 512, appIcon],
+  ["public/icon-192.png", 192, appIcon],
+  ["public/maskable-512.png", 512, fullBleed],
+  ["public/apple-icon.png", 180, fullBleed],
 ]) {
   await iconPage.setViewportSize({ width: size, height: size });
-  await iconPage.setContent(`<body style="margin:0">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="${size}" height="${size}" style="display:block">
-      <rect width="32" height="32" fill="#6d4aff"/>
-      <g transform="translate(16 16) scale(0.72) translate(-16 -16)">
-        <rect x="7.5" y="5.5" width="17" height="21" rx="4" fill="none" stroke="#fff" stroke-width="2"/>
-        <path d="M11.5 20.5v-9l4.5 5 4.5-5v9" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </g>
-    </svg></body>`);
-  await iconPage.screenshot({ path: file });
+  await iconPage.setContent(
+    `<body style="margin:0;background:transparent">${svg.replace(/width="256" height="256"/, `width="${size}" height="${size}" style="display:block"`)}</body>`,
+  );
+  await iconPage.screenshot({ path: file, omitBackground: true });
 }
 await iconPage.close();
 
