@@ -13,6 +13,7 @@ import { RightPanel } from "./RightPanel";
 import { Stage } from "./Stage";
 import { TopBar } from "./TopBar";
 import { VideoExportProgress } from "./VideoExportProgress";
+import { WorkspaceSpotlight } from "./WorkspaceSpotlight";
 
 function useProgressStep() {
   const hasShot = useScene((s) =>
@@ -68,6 +69,7 @@ export function EditorShell() {
         aria-hidden
         className="mf-dot-grid pointer-events-none absolute inset-0"
       />
+      <WorkspaceSpotlight />
 
       <div className="relative z-10">
         <TopBar />
