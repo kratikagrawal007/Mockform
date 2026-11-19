@@ -22,13 +22,35 @@
   --mf-text-muted: #b3b1b8;
   --mf-text-faint: #9a98a0;
 
-  --mf-accent: #6d4aff;
-  --mf-accent-hover: #5c38f5;
-  --mf-accent-soft: rgb(109 74 255 / 0.16);
-  /* Accent-coloured text and icons: lighter so it reads on dark surfaces (AA). */
-  --mf-accent-ink: #a993ff;
+  /* Monochrome accent, matching the logo: white in the dark theme. */
+  --mf-accent: #ffffff;
+  --mf-accent-hover: #e6e6e8;
+  --mf-accent-soft: rgb(255 255 255 / 0.1);
+  /* Accent-coloured text and icons. */
+  --mf-accent-ink: #ffffff;
   --mf-danger: #ff7b6e;
-  --mf-on-accent: #ffffff;
+  /* Text and icons that sit on the accent. */
+  --mf-on-accent: #111111;
+  /* Canvas overlays (selection box, snap guides) sit over any artwork, so they
+   use white with a thin dark halo instead of the theme accent. */
+  .mf-canvas-selection {
+    border-color: rgb(255 255 255 / 0.95);
+    box-shadow:
+      0 0 0 1px rgb(0 0 0 / 0.45),
+      inset 0 0 0 1px rgb(0 0 0 / 0.25);
+  }
+  .mf-canvas-guide {
+    background: #ffffff;
+    box-shadow: 0 0 0 1px rgb(0 0 0 / 0.4);
+  }
+
+  /* Glossy accent buttons: top, bottom, hover and glow. */
+  --mf-gloss-top: #ffffff;
+  --mf-gloss-bottom: #e4e4e7;
+  --mf-gloss-hover-top: #f1f1f3;
+  --mf-gloss-hover-bottom: #d6d6da;
+  --mf-gloss-rim: rgb(255 255 255 / 0.9);
+  --mf-gloss-glow: rgb(255 255 255 / 0.18);
 
   --mf-shadow-panel:
     0 1px 0 rgb(255 255 255 / 0.04) inset, 0 12px 32px -12px rgb(0 0 0 / 0.6);
@@ -50,19 +72,20 @@
   --mf-thumb-bottom: rgb(255 255 255 / 0.09);
   --mf-thumb-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.22), 0 1px 3px rgb(0 0 0 / 0.4);
-  --mf-ambient-1: rgb(109 74 255 / 0.28);
-  --mf-ambient-2: rgb(47 184 201 / 0.16);
-  --mf-ambient-3: rgb(255 122 89 / 0.13);
+  --mf-ambient-1: rgb(255 255 255 / 0.09);
+  --mf-ambient-2: rgb(170 180 200 / 0.08);
+  --mf-ambient-3: rgb(255 255 255 / 0.05);
 
   /* Value sliders: the fill and handle brighten on hover. */
   --mf-slider-fill: rgb(255 255 255 / 0.08);
-  --mf-slider-fill-hover: rgb(141 113 255 / 0.24);
+  --mf-slider-fill-hover: rgb(255 255 255 / 0.16);
   --mf-slider-handle: rgb(243 242 239 / 0.55);
   --mf-slider-handle-hover: #ffffff;
 
   /* Cursor spotlight on the empty workspace. */
-  --mf-spot-glow: rgb(120 134 180 / 0.11);
+  --mf-spot-glow: rgb(255 255 255 / 0.07);
   --mf-spot-dot: rgb(255 255 255 / 0.26);
+  --mf-slider-glow: rgb(255 255 255 / 0.55);
 }
 
 [data-theme="light"] {
@@ -82,12 +105,19 @@
   --mf-text-muted: #5f5d66;
   --mf-text-faint: #66646d;
 
-  --mf-accent: #6d4aff;
-  --mf-accent-hover: #5c38f5;
-  --mf-accent-soft: rgb(109 74 255 / 0.1);
-  --mf-accent-ink: #5a37f0;
+  /* Monochrome accent, matching the logo: black in the light theme. */
+  --mf-accent: #111111;
+  --mf-accent-hover: #2a2a2d;
+  --mf-accent-soft: rgb(17 17 17 / 0.07);
+  --mf-accent-ink: #111111;
   --mf-danger: #c62f24;
   --mf-on-accent: #ffffff;
+  --mf-gloss-top: #2c2c30;
+  --mf-gloss-bottom: #111111;
+  --mf-gloss-hover-top: #3a3a3f;
+  --mf-gloss-hover-bottom: #1c1c1f;
+  --mf-gloss-rim: rgb(255 255 255 / 0.18);
+  --mf-gloss-glow: rgb(17 17 17 / 0.3);
 
   --mf-shadow-panel:
     0 12px 32px -14px rgb(40 30 10 / 0.18), 0 1px 2px rgb(40 30 10 / 0.06);
@@ -109,17 +139,18 @@
   --mf-thumb-shadow:
     inset 0 1px 0 rgb(255 255 255 / 1), 0 1px 3px rgb(40 30 10 / 0.14),
     0 0 0 0.5px rgb(20 18 14 / 0.06);
-  --mf-ambient-1: rgb(150 120 255 / 0.22);
-  --mf-ambient-2: rgb(120 214 222 / 0.2);
-  --mf-ambient-3: rgb(255 168 140 / 0.2);
+  --mf-ambient-1: rgb(255 255 255 / 0.7);
+  --mf-ambient-2: rgb(200 196 188 / 0.25);
+  --mf-ambient-3: rgb(255 255 255 / 0.5);
 
   --mf-slider-fill: rgb(20 18 14 / 0.08);
-  --mf-slider-fill-hover: rgb(109 74 255 / 0.16);
+  --mf-slider-fill-hover: rgb(17 17 17 / 0.12);
   --mf-slider-handle: rgb(22 21 26 / 0.45);
   --mf-slider-handle-hover: #16151a;
 
-  --mf-spot-glow: rgb(109 74 255 / 0.07);
+  --mf-spot-glow: rgb(17 17 17 / 0.04);
   --mf-spot-dot: rgb(20 18 14 / 0.24);
+  --mf-slider-glow: rgb(17 17 17 / 0.25);
 }
 
 @theme inline {
@@ -296,19 +327,27 @@ body {
 .group:hover .mf-slider-handle,
 .group:has(:focus-visible) .mf-slider-handle {
   background: var(--mf-slider-handle-hover);
-  box-shadow: 0 0 6px rgb(141 113 255 / 0.6);
+  box-shadow: 0 0 6px var(--mf-slider-glow);
 }
 
 /* Glossy accent buttons: a slightly lighter top and a lit rim. */
 .mf-accent-gloss {
-  background: linear-gradient(180deg, #7452ff, #6440f5);
+  background: linear-gradient(
+    180deg,
+    var(--mf-gloss-top),
+    var(--mf-gloss-bottom)
+  );
   box-shadow:
-    inset 0 1px 0 rgb(255 255 255 / 0.28),
-    inset 0 -1px 0 rgb(0 0 0 / 0.15),
-    0 8px 20px -8px rgb(109 74 255 / 0.65);
+    inset 0 1px 0 var(--mf-gloss-rim),
+    inset 0 -1px 0 rgb(0 0 0 / 0.12),
+    0 8px 20px -8px var(--mf-gloss-glow);
 }
 .mf-accent-gloss:hover {
-  background: linear-gradient(180deg, #6a46ff, #5934ec);
+  background: linear-gradient(
+    180deg,
+    var(--mf-gloss-hover-top),
+    var(--mf-gloss-hover-bottom)
+  );
 }
 
 /* Soft colour behind the editor, so the glass has light to bend. */

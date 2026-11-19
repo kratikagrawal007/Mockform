@@ -87,19 +87,19 @@ export function ExportMenu() {
           type="button"
           onClick={run}
           title={`Export ${formatLabel} (⌘E)`}
-          className="flex items-center gap-1.5 pr-2.5 pl-3 text-ui font-semibold transition-colors hover:bg-white/10"
+          className="flex items-center gap-1.5 pr-2.5 pl-3 text-ui font-semibold transition-colors hover:bg-on-accent/10"
         >
           <Download className="size-4" aria-hidden />
           Export
         </button>
-        <span className="w-px bg-white/25" aria-hidden />
+        <span className="w-px bg-on-accent/20" aria-hidden />
         <button
           type="button"
           aria-label="Export options"
           aria-expanded={open}
           aria-haspopup="dialog"
           onClick={() => setOpen((o) => !o)}
-          className="grid w-8 place-items-center transition-colors hover:bg-white/10"
+          className="grid w-8 place-items-center transition-colors hover:bg-on-accent/10"
         >
           <ChevronDown
             className={`size-4 transition-transform duration-150 ${open ? "rotate-180" : ""}`}

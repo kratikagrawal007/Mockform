@@ -23,8 +23,11 @@ export function Switch({
         className={`relative block h-[18px] w-8 shrink-0 rounded-full transition-colors duration-150 ${checked ? "bg-accent" : "bg-border-strong"}`}
       >
         <span
-          className={`absolute top-[2px] left-0 block size-[14px] rounded-full bg-white shadow transition-transform duration-150 ${
-            checked ? "translate-x-[16px]" : "translate-x-[2px]"
+          className={`absolute top-[2px] left-0 block size-[14px] rounded-full shadow transition-[transform,background-color] duration-150 ${
+            // On the accent track the knob takes the contrasting colour (dark on white, white on black).
+            checked
+              ? "translate-x-[16px] bg-on-accent"
+              : "translate-x-[2px] bg-white"
           }`}
         />
       </span>

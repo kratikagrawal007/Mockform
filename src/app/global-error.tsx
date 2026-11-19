@@ -37,8 +37,8 @@ export default function GlobalError({
             type="button"
             onClick={retry}
             style={{
-              background: "#6d4aff",
-              color: "#fff",
+              background: "#ffffff",
+              color: "#111111",
               border: 0,
               borderRadius: 10,
               padding: "10px 16px",

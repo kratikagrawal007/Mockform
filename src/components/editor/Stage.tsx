@@ -398,7 +398,7 @@ export function Stage() {
                 <div
                   key={`${g.axis}-${g.at}`}
                   aria-hidden
-                  className="pointer-events-none absolute bg-accent"
+                  className="mf-canvas-guide pointer-events-none absolute"
                   style={
                     g.axis === "x"
                       ? { left: g.at * fit.width, top: 0, bottom: 0, width: 1 }
@@ -583,7 +583,7 @@ function DropPrompt({
       data-state={target ? "drop-target" : hovered ? "hover" : "idle"}
       className={`pointer-events-none absolute flex flex-col items-center justify-center overflow-hidden px-3 text-center transition-[opacity,background-color,box-shadow,color] duration-200 ${
         target
-          ? "bg-accent/25 text-white"
+          ? "bg-white/15 text-white"
           : hovered
             ? "bg-white/[0.04] text-white"
             : "text-white/75"
@@ -596,7 +596,7 @@ function DropPrompt({
         borderRadius: radius,
         clipPath,
         boxShadow: target
-          ? "inset 0 0 0 2px var(--mf-accent-ink), inset 0 0 40px rgb(109 74 255 / 0.35)"
+          ? "inset 0 0 0 2px rgb(255 255 255 / 0.9), inset 0 0 40px rgb(255 255 255 / 0.18)"
           : hovered
             ? "inset 0 0 0 1px rgb(255 255 255 / 0.14)"
             : "none",
@@ -691,7 +691,7 @@ function SelectionBox({
   const w = place.width * view;
   const h = place.height * view;
   const handle =
-    "pointer-events-auto absolute size-2.5 rounded-[3px] border border-accent bg-white shadow-sm -translate-x-1/2 -translate-y-1/2";
+    "pointer-events-auto absolute size-2.5 rounded-[3px] border border-[#111111] bg-white shadow-[0_0_0_1px_rgb(255_255_255/0.6)] -translate-x-1/2 -translate-y-1/2";
   const handlers = {
     onPointerMove: onMove,
     onPointerUp: onEnd,
@@ -701,7 +701,7 @@ function SelectionBox({
     <div
       data-testid="selection"
       aria-hidden
-      className={`pointer-events-none absolute rounded-[4px] border-[1.5px] ${cropping ? "border-dashed border-accent" : "border-accent/80"}`}
+      className={`mf-canvas-selection pointer-events-none absolute rounded-[4px] border-[1.5px] ${cropping ? "border-dashed" : ""}`}
       style={{
         width: w,
         height: h,
@@ -731,10 +731,10 @@ function SelectionBox({
               {...handlers}
             />
           ))}
-          <span className="absolute top-0 left-1/2 h-5 w-px -translate-y-full bg-accent/80" />
+          <span className="mf-canvas-guide absolute top-0 left-1/2 h-5 w-px -translate-y-full" />
           <span
             data-testid="rotate-handle"
-            className="pointer-events-auto absolute top-0 left-1/2 grid size-5 -translate-x-1/2 -translate-y-[calc(100%+18px)] cursor-grab place-items-center rounded-full border border-accent bg-white text-accent-ink shadow-sm"
+            className="pointer-events-auto absolute top-0 left-1/2 grid size-5 -translate-x-1/2 -translate-y-[calc(100%+18px)] cursor-grab place-items-center rounded-full border border-[#111111] bg-white text-[#111111] shadow-[0_0_0_1px_rgb(255_255_255/0.6)]"
             onPointerDown={onRotate}
             {...handlers}
           >
