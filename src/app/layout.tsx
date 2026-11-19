@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -15,6 +16,9 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+// Vercel sets this during its builds; local runs and CI leave analytics out.
+const onVercel = Boolean(process.env.NEXT_PUBLIC_VERCEL_ENV);
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -78,6 +82,8 @@ export default function RootLayout({
       {/* Browser extensions often add attributes to <body>; don't let that trip hydration. */}
       <body className="h-full overflow-hidden" suppressHydrationWarning>
         {children}
+        {/* Anonymous, cookie-free visit counts. Only on Vercel, which serves the script. */}
+        {onVercel && <Analytics />}
       </body>
     </html>
   );

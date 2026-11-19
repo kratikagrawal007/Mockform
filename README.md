@@ -74,7 +74,7 @@ marketing/            Generated launch images
 
 ## Privacy
 
-Mockform processes every image and video in your browser. Nothing is uploaded, and there's no tracking. See the [privacy page](src/app/privacy/page.tsx).
+Mockform processes every image and video in your browser; nothing is uploaded. The live site counts visits with Vercel Web Analytics, which is anonymous and cookie-free. See the [privacy page](src/app/privacy/page.tsx).
 
 ## License
 

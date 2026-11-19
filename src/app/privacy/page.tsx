@@ -23,7 +23,7 @@ export default function PrivacyPage() {
           Privacy
         </h1>
         <p className="mt-2 text-label text-faint">
-          Last updated 19 November 2026
+          Last updated 19 November 2026 (analytics added)
         </p>
 
         <div className="mt-8 space-y-6 text-[15px] leading-relaxed text-muted [&_h2]:mb-2 [&_h2]:text-[17px] [&_h2]:font-semibold [&_h2]:text-ink">
@@ -47,10 +47,14 @@ export default function PrivacyPage() {
             </p>
           </section>
           <section>
-            <h2>No tracking</h2>
+            <h2>Anonymous visit counts</h2>
             <p>
-              Mockform sets no cookies and includes no advertising or tracking
-              scripts.
+              To see how many people use Mockform, the site uses Vercel Web
+              Analytics. It counts page views and records the page, the
+              referring site, your country, and your browser, device and
+              operating system type. It sets no cookies, doesn&rsquo;t identify
+              or follow you across sites, and never sees your screenshots,
+              videos or exports. There is no advertising.
             </p>
           </section>
           <section>

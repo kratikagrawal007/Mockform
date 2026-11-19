@@ -16,6 +16,7 @@
     "assets": "node scripts/make-launch-assets.mjs"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "lucide-react": "^1.75.0",
     "mediabunny": "^1.66.0",
     "next": "16.4.6",
