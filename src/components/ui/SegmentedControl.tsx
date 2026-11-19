@@ -41,14 +41,20 @@ export function SegmentedControl<T extends string>({
     refs.current[next]?.focus();
   }
 
+  // A multi-row grid keeps equal cells; a single row lets each segment size to
+  // its label (sharing spare space) so longer words like "Gradient" never spill.
+  const grid = columns !== undefined && columns < options.length;
+
   return (
     <div
       role="radiogroup"
       aria-label={label}
-      className="mf-well grid gap-1 rounded-[12px] p-1"
-      style={{
-        gridTemplateColumns: `repeat(${columns ?? options.length}, minmax(0, 1fr))`,
-      }}
+      className={`mf-well gap-1 rounded-[12px] p-1 ${grid ? "grid" : "flex"}`}
+      style={
+        grid
+          ? { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }
+          : undefined
+      }
     >
       {options.map((opt, i) => {
         const selected = opt.value === value;
@@ -65,7 +71,9 @@ export function SegmentedControl<T extends string>({
             title={opt.title}
             onClick={() => onChange(opt.value)}
             onKeyDown={(e) => onKeyDown(e, i)}
-            className={`rounded-[8px] px-2 py-1.5 text-label font-medium transition-colors duration-150 ${
+            className={`rounded-[8px] px-2 py-1.5 text-label font-medium whitespace-nowrap transition-colors duration-150 ${
+              grid ? "min-w-0 truncate" : "flex-auto"
+            } ${
               selected
                 ? "mf-thumb text-ink"
                 : "text-muted hover:bg-hover hover:text-ink"
