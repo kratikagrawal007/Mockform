@@ -1,10 +1,11 @@
 "use client";
 
-import { Crop as CropIcon, ImagePlus, RotateCw } from "lucide-react";
+import { Crop as CropIcon, ImageDown, ImageUp, RotateCw } from "lucide-react";
 import {
   useEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { fitInside } from "@/editor/canvas";
@@ -74,6 +75,8 @@ export function Stage() {
   const gesture = useRef<Gesture | null>(null);
   const [guides, setGuides] = useState<Guide[]>([]);
   const [dragging, setDragging] = useState(false);
+  const [hoverKey, setHoverKey] = useState<string | null>(null);
+  const fileDrag = useUI((s) => s.fileDrag);
 
   const fit = fitInside(canvas, {
     width: box.width,
@@ -198,7 +201,14 @@ export function Stage() {
 
   const onPointerMove = (e: ReactPointerEvent) => {
     const g = gesture.current;
-    if (!g) return;
+    if (!g) {
+      // Not dragging: track which empty screen the pointer is over, for the hover state.
+      const p = toCanvas(e.clientX, e.clientY);
+      const i = deviceAt(p.x, p.y);
+      const key = i === -1 ? null : resolved.devices[i].instance.key;
+      if (key !== hoverKey) setHoverKey(key);
+      return;
+    }
     const p = toCanvas(e.clientX, e.clientY);
     const scene = getScene();
     const d = scene.devices.find((x) => x.key === g.key);
@@ -360,6 +370,7 @@ export function Stage() {
               onPointerDown={onCanvasPointerDown}
               onPointerMove={onPointerMove}
               onPointerUp={endGesture}
+              onPointerLeave={() => setHoverKey(null)}
               onPointerCancel={endGesture}
               onDoubleClick={onDoubleClick}
               onWheel={onWheel}
@@ -371,6 +382,15 @@ export function Stage() {
                     d={d}
                     place={placements[i]}
                     view={view}
+                    hovered={hoverKey === d.instance.key}
+                    occluders={placements.slice(i + 1)}
+                    dropState={
+                      !fileDrag.active
+                        ? "idle"
+                        : fileDrag.targetKey === d.instance.key
+                          ? "target"
+                          : "other"
+                    }
                   />
                 ),
               )}
@@ -434,54 +454,219 @@ export function Stage() {
   );
 }
 
+/**
+ * A clip-path that hides the parts of a prompt covered by devices in front of
+ * it. Each front device is approximated by its rotated rectangle, mapped into
+ * the prompt's own rotated coordinate space and cut out with the even-odd rule.
+ */
+function occlusionClip(
+  place: Placement,
+  ox: number,
+  oy: number,
+  w: number,
+  h: number,
+  view: number,
+  occluders: Placement[],
+): { clip?: string; visibleLeft: number; visibleRight: number } {
+  if (!occluders.length) return { visibleLeft: 0, visibleRight: w };
+  const cos = Math.cos(-place.rotation);
+  const sin = Math.sin(-place.rotation);
+  // Overlay point -> prompt-local point.
+  const toLocal = (qx: number, qy: number) => {
+    const dx = qx - place.cx * view;
+    const dy = qy - place.cy * view;
+    return [dx * cos - dy * sin - ox + w / 2, dx * sin + dy * cos - oy + h / 2];
+  };
+  // Track the uncovered horizontal span across the middle of the screen, so the
+  // prompt's text can sit in the part you can actually see.
+  let visibleLeft = 0;
+  let visibleRight = w;
+  const holes = occluders.map((o) => {
+    const c = Math.cos(o.rotation);
+    const sn = Math.sin(o.rotation);
+    const hw = (o.width * view) / 2;
+    const hh = (o.height * view) / 2;
+    const corners = [
+      [-hw, -hh],
+      [hw, -hh],
+      [hw, hh],
+      [-hw, hh],
+    ].map(([x, y]) =>
+      toLocal(o.cx * view + x * c - y * sn, o.cy * view + x * sn + y * c),
+    );
+    const xs = corners.map(([x]) => x);
+    const ys = corners.map(([, y]) => y);
+    const minX = Math.min(...xs);
+    const maxX = Math.max(...xs);
+    if (
+      Math.min(...ys) < h / 2 &&
+      Math.max(...ys) > h / 2 &&
+      maxX > 0 &&
+      minX < w
+    ) {
+      // Covers the middle row: trim whichever side it sits on.
+      if ((minX + maxX) / 2 > w / 2)
+        visibleRight = Math.min(visibleRight, minX);
+      else visibleLeft = Math.max(visibleLeft, maxX);
+    }
+    return `M${corners.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join(" L")} Z`;
+  });
+  return {
+    clip: `path(evenodd, "M0 0 H${w.toFixed(1)} V${h.toFixed(1)} H0 Z ${holes.join(" ")}")`,
+    visibleLeft,
+    visibleRight: Math.max(visibleLeft, visibleRight),
+  };
+}
+
+const noop = () => () => {};
+const isMac = () =>
+  /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+
+/**
+ * The guide shown on an empty device screen: what to do, the exact size the
+ * screen expects, and how to add a file. It adapts to the screen's size and
+ * reacts to hover and to a file being dragged over it.
+ */
 function DropPrompt({
   d,
   place,
   view,
+  hovered,
+  dropState,
+  occluders,
 }: {
   d: ResolvedDevice;
   place: Placement;
   view: number;
+  hovered: boolean;
+  dropState: "idle" | "target" | "other";
+  /** Devices drawn in front of this one; the prompt is hidden where they cover it. */
+  occluders: Placement[];
 }) {
+  const mac = useSyncExternalStore(noop, isMac, () => true);
   const s = d.geo.screen;
   const w = s.width * place.scale * view;
   const h = s.height * place.scale * view;
   // Screen centre relative to the device centre, rotated with the device.
   const ox = (s.x + s.width / 2 - d.geo.width / 2) * place.scale * view;
   const oy = (s.y + s.height / 2 - d.geo.height / 2) * place.scale * view;
-  const small = Math.min(w, h) < 120;
+  const radius =
+    (typeof s.radius === "number" ? s.radius : s.radius[0]) *
+    place.scale *
+    view;
+  const target = dropState === "target";
+  const {
+    clip: clipPath,
+    visibleLeft,
+    visibleRight,
+  } = occlusionClip(place, ox, oy, w, h, view, occluders);
+  // Size the guide to the part of the screen that's actually visible.
+  const visibleW = visibleRight - visibleLeft;
+  const shift = (visibleLeft + visibleRight) / 2 - w / 2;
+  const size = Math.min(visibleW, h);
+  // Full guide only when the text fits on one line each; otherwise icon + link.
+  const tier =
+    size < 70 || visibleW < 100
+      ? "tiny"
+      : visibleW < 210 || h < 220
+        ? "compact"
+        : "full";
+  const choose = () => {
+    useUI.getState().select(d.instance.key);
+    openPicker("screenshot");
+  };
+  const Icon = target ? ImageDown : ImageUp;
+
   return (
     <div
       data-testid="drop-prompt"
-      className="pointer-events-none absolute flex flex-col items-center justify-center gap-1.5 overflow-hidden px-2 text-center text-white/85"
+      data-state={target ? "drop-target" : hovered ? "hover" : "idle"}
+      className={`pointer-events-none absolute flex flex-col items-center justify-center overflow-hidden px-3 text-center transition-[opacity,background-color,box-shadow,color] duration-200 ${
+        target
+          ? "bg-accent/25 text-white"
+          : hovered
+            ? "bg-white/[0.04] text-white"
+            : "text-white/75"
+      } ${dropState === "other" ? "opacity-50" : "opacity-100"}`}
       style={{
         width: w,
         height: h,
         left: place.cx * view - w / 2,
         top: place.cy * view - h / 2,
+        borderRadius: radius,
+        clipPath,
+        boxShadow: target
+          ? "inset 0 0 0 2px var(--mf-accent-ink), inset 0 0 40px rgb(109 74 255 / 0.35)"
+          : hovered
+            ? "inset 0 0 0 1px rgb(255 255 255 / 0.14)"
+            : "none",
         transform: `rotate(${place.rotation}rad) translate(${ox}px, ${oy}px)`,
       }}
     >
-      {!small && <ImagePlus className="size-5 shrink-0" aria-hidden />}
-      {!small && (
-        <span className="text-ui font-medium">Drop a screenshot or video</span>
-      )}
-      {!small && (
-        <span className="font-mono text-label text-white/55 tabular-nums">
-          {d.geo.nativeScreen.width} × {d.geo.nativeScreen.height} px
-        </span>
-      )}
-      <button
-        type="button"
-        className="pointer-events-auto mt-1 rounded-full bg-white/12 px-3 py-1 text-label font-medium transition-colors hover:bg-white/20"
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={() => {
-          useUI.getState().select(d.instance.key);
-          openPicker("screenshot");
+      <div
+        className="flex max-w-full flex-col items-center"
+        style={{
+          transform: shift ? `translateX(${shift}px)` : undefined,
+          maxWidth: Math.max(60, visibleW - 16),
         }}
       >
-        {small ? "Add" : "Choose file"}
-      </button>
+        {tier === "tiny" ? (
+          <button
+            type="button"
+            aria-label="Choose a screenshot or video"
+            title="Choose file"
+            className="pointer-events-auto grid size-8 place-items-center rounded-full bg-white/12 hover:bg-white/20"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={choose}
+          >
+            <Icon className="size-4" aria-hidden />
+          </button>
+        ) : (
+          <>
+            <Icon
+              className={`shrink-0 transition-transform duration-200 ${tier === "full" ? "mb-3 size-7" : "mb-2 size-5"} ${
+                target ? "scale-110" : hovered ? "-translate-y-0.5" : ""
+              }`}
+              strokeWidth={1.6}
+              aria-hidden
+            />
+            {tier === "full" && (
+              <p
+                className={`font-medium tracking-[-0.01em] ${w > 240 ? "text-[15px]" : "text-[13px]"}`}
+              >
+                {target ? "Release to add" : "Drop a screenshot or video"}
+              </p>
+            )}
+            {tier === "full" && !target && (
+              <p className="mt-1.5 font-mono text-label text-white/55 tabular-nums">
+                {d.geo.nativeScreen.width} × {d.geo.nativeScreen.height} px
+              </p>
+            )}
+            {!target && (
+              <p
+                className={`text-white/50 ${tier === "full" ? "mt-3 text-[12px]" : "text-label"}`}
+              >
+                <button
+                  type="button"
+                  className={`pointer-events-auto font-medium whitespace-nowrap underline decoration-1 underline-offset-[3px] transition-colors ${
+                    hovered
+                      ? "text-white decoration-white/70"
+                      : "text-white/85 decoration-white/35"
+                  } hover:decoration-white`}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={choose}
+                >
+                  Choose file
+                </button>
+                {tier === "full" && <> or paste with {mac ? "⌘V" : "Ctrl+V"}</>}
+              </p>
+            )}
+            {target && tier === "compact" && (
+              <p className="text-label font-medium">Release to add</p>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

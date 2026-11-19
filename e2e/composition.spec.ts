@@ -173,3 +173,55 @@ test("social and showcase presets", async ({ page }) => {
     page.getByRole("radio", { name: "Fan", exact: true }),
   ).toHaveAttribute("aria-checked", "true");
 });
+
+test("dragging a file over a device highlights it as the drop target", async ({
+  page,
+}) => {
+  await page.getByRole("radio", { name: "Fan", exact: true }).click();
+  const box = (await page.getByTestId("canvas").boundingBox())!;
+  const point = [box.x + box.width / 2, box.y + box.height * 0.48] as const;
+  const drag = (type: string) =>
+    page.evaluate(
+      ([type, x, y]) => {
+        const dt = new DataTransfer();
+        dt.items.add(new File(["x"], "shot.png", { type: "image/png" }));
+        const target = document.elementFromPoint(x as number, y as number)!;
+        target.dispatchEvent(
+          new DragEvent(type as string, {
+            bubbles: true,
+            cancelable: true,
+            clientX: x as number,
+            clientY: y as number,
+            dataTransfer: dt,
+          }),
+        );
+      },
+      [type, ...point] as const,
+    );
+
+  await drag("dragenter");
+  await drag("dragover");
+  const prompts = page.getByTestId("drop-prompt");
+  await expect(
+    prompts.and(page.locator('[data-state="drop-target"]')),
+  ).toHaveCount(1);
+  await expect(
+    page.getByText("Release to add it to this device"),
+  ).toBeVisible();
+
+  await drag("dragleave");
+  await expect(page.locator('[data-state="drop-target"]')).toHaveCount(0);
+  await expect(page.getByText("Release to add it to this device")).toBeHidden();
+});
+
+test("the empty-screen guide explains what to add and how", async ({
+  page,
+}) => {
+  const prompt = page.getByTestId("drop-prompt");
+  await expect(prompt).toContainText("Drop a screenshot or video");
+  await expect(prompt).toContainText("1206 × 2622 px");
+  await expect(prompt).toContainText(/or paste with (⌘V|Ctrl\+V)/);
+  await expect(
+    prompt.getByRole("button", { name: "Choose file" }),
+  ).toBeVisible();
+});

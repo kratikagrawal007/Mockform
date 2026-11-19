@@ -54,6 +54,7 @@ export function ImportController() {
   const bgRef = useRef<HTMLInputElement>(null);
   const frameRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const dragTarget = useUI((s) => s.fileDrag.targetKey);
 
   useEffect(() => {
     registerPicker("screenshot", shotRef.current);
@@ -71,20 +72,34 @@ export function ImportController() {
       e.preventDefault();
       depth++;
       setDragging(true);
+      useUI.getState().setFileDrag({
+        active: true,
+        targetKey: deviceKeyAt(e.clientX, e.clientY),
+      });
     };
     const onOver = (e: DragEvent) => {
-      if (hasFiles(e)) e.preventDefault();
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      // Light up the device the file would land on.
+      useUI.getState().setFileDrag({
+        active: true,
+        targetKey: deviceKeyAt(e.clientX, e.clientY),
+      });
     };
     const onLeave = (e: DragEvent) => {
       if (!hasFiles(e)) return;
       depth = Math.max(0, depth - 1);
-      if (depth === 0) setDragging(false);
+      if (depth === 0) {
+        setDragging(false);
+        useUI.getState().setFileDrag({ active: false, targetKey: null });
+      }
     };
     const onDrop = (e: DragEvent) => {
       if (!hasFiles(e)) return;
       e.preventDefault();
       depth = 0;
       setDragging(false);
+      useUI.getState().setFileDrag({ active: false, targetKey: null });
       // Dropping onto a device fills that device.
       const key = deviceKeyAt(e.clientX, e.clientY);
       if (key) useUI.getState().select(key);
@@ -159,16 +174,19 @@ export function ImportController() {
         }}
       />
       {dragging && (
-        <div className="pointer-events-none fixed inset-0 z-50 grid place-items-center bg-workspace/60 backdrop-blur-[2px]">
-          <div className="mf-glass-strong flex flex-col items-center gap-3 rounded-[20px] border-2 border-dashed border-accent px-10 py-8 shadow-panel">
-            <ImagePlus className="size-7 text-accent-ink" aria-hidden />
-            <p className="text-[15px] font-semibold">
-              Drop to add screenshots or videos
+        // A light hint instead of a full-screen card, so the devices stay visible
+        // and the one under the pointer can light up.
+        <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center">
+          <div className="mf-glass-strong flex items-center gap-2.5 rounded-full py-2.5 pr-5 pl-3.5">
+            <ImagePlus className="size-4 text-accent-ink" aria-hidden />
+            <p className="text-ui font-medium">
+              {dragTarget
+                ? "Release to add it to this device"
+                : "Drop on a device to fill it"}
             </p>
-            <p className="text-muted">
-              Drop on a device to fill it · images up to 50 MB, videos up to 200
-              MB
-            </p>
+            <span className="text-label text-faint">
+              Images up to 50 MB · videos up to 200 MB
+            </span>
           </div>
         </div>
       )}

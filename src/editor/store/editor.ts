@@ -143,6 +143,9 @@ interface UIStore {
   exported: boolean;
   /** 0–1 while a video export runs, otherwise null. */
   videoProgress: number | null;
+  /** While a file is dragged over the page: which device it would land on. */
+  fileDrag: { active: boolean; targetKey: string | null };
+  setFileDrag: (drag: { active: boolean; targetKey: string | null }) => void;
   setVideoProgress: (p: number | null) => void;
   select: (key: string | null) => void;
   setCropping: (on: boolean) => void;
@@ -167,6 +170,14 @@ export const useUI = create<UIStore>()((set) => ({
   exported: false,
   videoProgress: null,
   setVideoProgress: (videoProgress) => set({ videoProgress }),
+  fileDrag: { active: false, targetKey: null },
+  setFileDrag: (fileDrag) =>
+    set((s) =>
+      s.fileDrag.active === fileDrag.active &&
+      s.fileDrag.targetKey === fileDrag.targetKey
+        ? s
+        : { fileDrag },
+    ),
   select: (selectedKey) =>
     set((s) => ({
       selectedKey,
