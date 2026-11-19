@@ -33,7 +33,7 @@ import { useElementSize } from "@/hooks/useElementSize";
 
 const LABEL_SPACE = 28;
 const CHECKERBOARD =
-  "repeating-conic-gradient(var(--mf-raised) 0% 25%, var(--mf-panel-solid) 0% 50%) 0 0 / 16px 16px";
+  "repeating-conic-gradient(rgb(128 128 128 / 0.22) 0% 25%, transparent 0% 50%) 0 0 / 16px 16px, var(--mf-panel-solid)";
 /** Snap distance in screen pixels. */
 const SNAP_PX = 8;
 
@@ -421,7 +421,7 @@ export function Stage() {
             )}
             {cropping && (
               <div className="pointer-events-none absolute inset-x-0 -top-1 flex -translate-y-full justify-center">
-                <span className="flex items-center gap-1.5 rounded-full bg-accent px-3 py-1 text-label font-medium text-on-accent">
+                <span className="mf-accent-gloss flex items-center gap-1.5 rounded-full px-3 py-1 text-label font-medium text-on-accent">
                   <CropIcon className="size-3.5" aria-hidden />
                   Drag to reposition · scroll to zoom · Esc when done
                 </span>

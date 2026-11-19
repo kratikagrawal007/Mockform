@@ -45,7 +45,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="grid gap-1 rounded-[12px] bg-raised p-1"
+      className="mf-well grid gap-1 rounded-[12px] p-1"
       style={{
         gridTemplateColumns: `repeat(${columns ?? options.length}, minmax(0, 1fr))`,
       }}
@@ -67,7 +67,7 @@ export function SegmentedControl<T extends string>({
             onKeyDown={(e) => onKeyDown(e, i)}
             className={`rounded-[8px] px-2 py-1.5 text-label font-medium transition-colors duration-150 ${
               selected
-                ? "bg-panel-solid text-ink shadow-[0_1px_2px_rgb(0_0_0/0.25)]"
+                ? "mf-thumb text-ink"
                 : "text-muted hover:bg-hover hover:text-ink"
             }`}
           >

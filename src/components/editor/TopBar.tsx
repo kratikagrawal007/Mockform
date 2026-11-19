@@ -19,7 +19,7 @@ export function TopBar() {
       <Logo />
 
       <div className="flex items-center gap-1">
-        <div className="flex items-center gap-0.5 rounded-[12px] border border-hairline bg-panel p-0.5 backdrop-blur-xl">
+        <div className="mf-glass-pill flex items-center gap-0.5 rounded-[12px] p-0.5">
           <ThemeToggle />
           <IconButton
             label="Keyboard shortcuts"
@@ -36,7 +36,7 @@ export function TopBar() {
           </IconButton>
         </div>
 
-        <div className="ml-1 flex items-center gap-0.5 rounded-[12px] border border-hairline bg-panel p-0.5 backdrop-blur-xl">
+        <div className="mf-glass-pill ml-1 flex items-center gap-0.5 rounded-[12px] p-0.5">
           <IconButton
             label="Undo"
             shortcut="⌘Z"

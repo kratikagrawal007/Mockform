@@ -7,7 +7,7 @@ export function ProgressRail({ current = 0 }: { current?: number }) {
   return (
     <ol
       aria-label="Getting started"
-      className="flex items-center gap-1 rounded-full border border-hairline bg-panel p-1 text-label backdrop-blur-xl"
+      className="mf-glass-pill flex items-center gap-1 rounded-full p-1 text-label"
     >
       {STEPS.map((step, i) => {
         const done = i < current;
@@ -36,8 +36,8 @@ export function ProgressRail({ current = 0 }: { current?: number }) {
               <span
                 className={`grid size-5 place-items-center rounded-full font-mono text-[10px] font-semibold ${
                   active || done
-                    ? "bg-accent text-on-accent"
-                    : "bg-raised text-muted"
+                    ? "mf-accent-gloss text-on-accent"
+                    : "mf-well text-muted"
                 }`}
               >
                 {done ? <Check className="size-3" aria-hidden /> : i + 1}

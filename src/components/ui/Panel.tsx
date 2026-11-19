@@ -15,7 +15,7 @@ export function Panel({
   return (
     <aside
       aria-label={label}
-      className={`flex flex-col overflow-y-auto rounded-[var(--radius-panel)] border border-hairline bg-panel shadow-panel backdrop-blur-xl ${className}`}
+      className={`mf-glass flex flex-col overflow-y-auto rounded-[var(--radius-panel)] ${className}`}
     >
       {children}
     </aside>

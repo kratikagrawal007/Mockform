@@ -3,6 +3,7 @@
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { Panel, PanelSection } from "@/components/ui/Panel";
+import { ScrollArea } from "@/components/ui/ScrollArea";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import {
   applyShowcaseScene,
@@ -106,7 +107,7 @@ function DevicesSection() {
               onClick={() => setFilter(f.id)}
               className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-label font-medium transition-colors duration-150 ${
                 selected
-                  ? "border-transparent bg-accent text-on-accent"
+                  ? "mf-accent-gloss border-transparent text-on-accent"
                   : "border-hairline text-muted hover:bg-hover hover:text-ink"
               }`}
             >
@@ -121,32 +122,34 @@ function DevicesSection() {
         })}
       </div>
 
-      <ul className="grid grid-cols-2 gap-2" aria-label="Devices">
-        {visible.map((spec) => (
-          <li key={spec.id}>
-            <DeviceCard
-              spec={spec}
-              selected={spec.id === current.deviceId}
-              colorId={current.colorId}
-            />
-          </li>
-        ))}
-        {(filter === "custom" || filter === "all") && (
-          <li>
-            <button
-              type="button"
-              onClick={() => openPicker("frame")}
-              className="flex h-full min-h-[106px] w-full flex-col items-center justify-center gap-1.5 rounded-[12px] border border-dashed border-border-strong p-2 text-muted hover:bg-hover hover:text-ink"
-            >
-              <Plus className="size-4" aria-hidden />
-              <span className="text-label font-medium">Add your frame</span>
-              <span className="text-[10px] text-faint">
-                PNG with a transparent screen
-              </span>
-            </button>
-          </li>
-        )}
-      </ul>
+      <ScrollArea maxHeight={276} testId="device-scroll">
+        <ul className="grid grid-cols-2 gap-2" aria-label="Devices">
+          {visible.map((spec) => (
+            <li key={spec.id}>
+              <DeviceCard
+                spec={spec}
+                selected={spec.id === current.deviceId}
+                colorId={current.colorId}
+              />
+            </li>
+          ))}
+          {(filter === "custom" || filter === "all") && (
+            <li>
+              <button
+                type="button"
+                onClick={() => openPicker("frame")}
+                className="flex h-full min-h-[106px] w-full flex-col items-center justify-center gap-1.5 rounded-[12px] border border-dashed border-border-strong p-2 text-muted hover:bg-hover hover:text-ink"
+              >
+                <Plus className="size-4" aria-hidden />
+                <span className="text-label font-medium">Add your frame</span>
+                <span className="text-[10px] text-faint">
+                  PNG with a transparent screen
+                </span>
+              </button>
+            </li>
+          )}
+        </ul>
+      </ScrollArea>
     </PanelSection>
   );
 }
@@ -232,58 +235,62 @@ function PresetsSection() {
         onChange={setTab}
       />
       {tab === "social" ? (
-        <ul className="mt-2 space-y-0.5" aria-label="Social sizes">
-          {SOCIAL_PRESETS.map((p) => (
-            <li key={p.id}>
-              <button
-                type="button"
-                aria-pressed={canvasLabel === p.name}
-                onClick={() => applySocial(p)}
-                className={`flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-label ${
-                  canvasLabel === p.name
-                    ? "bg-accent-soft text-ink"
-                    : "text-muted hover:bg-hover hover:text-ink"
-                }`}
-              >
-                <span className="font-medium">{p.name}</span>
-                <span className="font-mono text-faint tabular-nums">
-                  {p.width}×{p.height}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+        <ScrollArea maxHeight={196} className="mt-2">
+          <ul className="space-y-0.5" aria-label="Social sizes">
+            {SOCIAL_PRESETS.map((p) => (
+              <li key={p.id}>
+                <button
+                  type="button"
+                  aria-pressed={canvasLabel === p.name}
+                  onClick={() => applySocial(p)}
+                  className={`flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-label ${
+                    canvasLabel === p.name
+                      ? "bg-accent-soft text-ink"
+                      : "text-muted hover:bg-hover hover:text-ink"
+                  }`}
+                >
+                  <span className="font-medium">{p.name}</span>
+                  <span className="font-mono text-faint tabular-nums">
+                    {p.width}×{p.height}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </ScrollArea>
       ) : (
-        <ul className="mt-2 space-y-2" aria-label="Showcase scenes">
-          {SHOWCASE_PRESETS.map((p) => (
-            <li key={p.id}>
-              <button
-                type="button"
-                onClick={() => applyShowcaseScene(p)}
-                className="flex w-full items-center gap-2.5 rounded-[10px] border border-hairline p-1.5 text-left hover:bg-hover"
-              >
-                <span
-                  aria-hidden
-                  className="h-10 w-14 shrink-0 rounded-md"
-                  style={{
-                    background:
-                      p.background.kind === "gradient"
-                        ? gradientCss(getGradient(p.background.gradientId))
-                        : p.background.color,
-                  }}
-                />
-                <span className="min-w-0">
-                  <span className="block truncate text-label font-medium text-ink">
-                    {p.name}
+        <ScrollArea maxHeight={236} className="mt-2">
+          <ul className="space-y-2" aria-label="Showcase scenes">
+            {SHOWCASE_PRESETS.map((p) => (
+              <li key={p.id}>
+                <button
+                  type="button"
+                  onClick={() => applyShowcaseScene(p)}
+                  className="flex w-full items-center gap-2.5 rounded-[10px] border border-hairline p-1.5 text-left hover:bg-hover"
+                >
+                  <span
+                    aria-hidden
+                    className="h-10 w-14 shrink-0 rounded-md"
+                    style={{
+                      background:
+                        p.background.kind === "gradient"
+                          ? gradientCss(getGradient(p.background.gradientId))
+                          : p.background.color,
+                    }}
+                  />
+                  <span className="min-w-0">
+                    <span className="block truncate text-label font-medium text-ink">
+                      {p.name}
+                    </span>
+                    <span className="block truncate text-[10px] text-faint">
+                      {p.description}
+                    </span>
                   </span>
-                  <span className="block truncate text-[10px] text-faint">
-                    {p.description}
-                  </span>
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </ScrollArea>
       )}
     </PanelSection>
   );

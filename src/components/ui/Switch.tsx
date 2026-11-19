@@ -15,7 +15,7 @@ export function Switch({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className="flex h-9 w-full items-center justify-between rounded-[var(--radius-control)] bg-raised px-3 text-label text-muted"
+      className="mf-well flex h-9 w-full items-center justify-between rounded-[var(--radius-control)] px-3 text-label text-muted"
     >
       {label}
       <span

@@ -62,6 +62,10 @@ export function EditorShell() {
     >
       <div
         aria-hidden
+        className="mf-ambient pointer-events-none absolute inset-0"
+      />
+      <div
+        aria-hidden
         className="mf-dot-grid pointer-events-none absolute inset-0"
       />
 

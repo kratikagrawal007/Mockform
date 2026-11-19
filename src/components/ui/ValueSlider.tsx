@@ -34,7 +34,7 @@ export function ValueSlider({
 
   return (
     <label
-      className="relative block h-9 overflow-hidden rounded-[var(--radius-control)] bg-raised select-none has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent"
+      className="mf-well relative block h-9 overflow-hidden rounded-[var(--radius-control)] select-none has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent"
       onDoubleClick={() => onChange(defaultValue)}
     >
       <span

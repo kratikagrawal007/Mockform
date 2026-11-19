@@ -82,12 +82,12 @@ export function ExportMenu() {
 
   return (
     <div ref={rootRef} className="relative ml-2">
-      <div className="flex h-9 items-stretch overflow-hidden rounded-[12px] bg-accent text-on-accent shadow-[0_6px_16px_-6px_var(--mf-accent)]">
+      <div className="mf-accent-gloss flex h-9 items-stretch overflow-hidden rounded-[12px] text-on-accent">
         <button
           type="button"
           onClick={run}
           title={`Export ${formatLabel} (⌘E)`}
-          className="flex items-center gap-1.5 pr-2.5 pl-3 text-ui font-semibold transition-colors hover:bg-accent-hover"
+          className="flex items-center gap-1.5 pr-2.5 pl-3 text-ui font-semibold transition-colors hover:bg-white/10"
         >
           <Download className="size-4" aria-hidden />
           Export
@@ -99,7 +99,7 @@ export function ExportMenu() {
           aria-expanded={open}
           aria-haspopup="dialog"
           onClick={() => setOpen((o) => !o)}
-          className="grid w-8 place-items-center transition-colors hover:bg-accent-hover"
+          className="grid w-8 place-items-center transition-colors hover:bg-white/10"
         >
           <ChevronDown
             className={`size-4 transition-transform duration-150 ${open ? "rotate-180" : ""}`}
@@ -112,7 +112,7 @@ export function ExportMenu() {
         <div
           role="dialog"
           aria-label="Export options"
-          className="absolute top-11 right-0 z-40 w-72 space-y-3 rounded-[var(--radius-panel)] border border-hairline bg-panel-solid p-3 shadow-panel"
+          className="mf-glass-strong absolute top-11 right-0 z-40 w-72 space-y-3 rounded-[var(--radius-panel)] p-3"
         >
           <div className="space-y-1.5">
             <p className="text-label font-medium text-muted">Format</p>
@@ -215,7 +215,7 @@ export function ExportMenu() {
                 setOpen(false);
                 run();
               }}
-              className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-control)] bg-accent text-ui font-semibold text-on-accent hover:bg-accent-hover disabled:opacity-40"
+              className="mf-accent-gloss flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-control)] text-ui font-semibold text-on-accent disabled:opacity-40"
             >
               {format === "video" ? (
                 <Film className="size-4" aria-hidden />
@@ -233,7 +233,7 @@ export function ExportMenu() {
                   setOpen(false);
                   void copyExport();
                 }}
-                className="flex h-9 items-center justify-center gap-1.5 rounded-[var(--radius-control)] border border-hairline bg-raised px-3 text-ui font-medium hover:bg-hover disabled:opacity-40"
+                className="mf-glass-pill flex h-9 items-center justify-center gap-1.5 rounded-[var(--radius-control)] px-3 text-ui font-medium hover:brightness-110 disabled:opacity-40"
               >
                 <Copy className="size-4" aria-hidden />
                 Copy

@@ -23,10 +23,10 @@ export function VideoExportProgress() {
           aria-valuemin={0}
           aria-valuemax={100}
           aria-valuenow={pct}
-          className="h-2 overflow-hidden rounded-full bg-raised"
+          className="mf-well h-2 overflow-hidden rounded-full"
         >
           <div
-            className="h-full rounded-full bg-accent transition-[width] duration-150"
+            className="mf-accent-gloss h-full rounded-full transition-[width] duration-150"
             style={{ width: `${pct}%` }}
           />
         </div>

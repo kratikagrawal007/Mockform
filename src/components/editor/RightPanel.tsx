@@ -232,7 +232,7 @@ function ScreenshotSection({ device }: { device: DeviceInstance }) {
               onClick={() => setCropping(!cropping)}
               className={`flex h-9 flex-1 items-center justify-center gap-1.5 rounded-[var(--radius-control)] border text-label font-medium ${
                 cropping
-                  ? "border-accent bg-accent text-on-accent"
+                  ? "mf-accent-gloss border-transparent text-on-accent"
                   : "border-hairline bg-raised hover:bg-hover"
               }`}
             >

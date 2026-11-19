@@ -33,7 +33,7 @@ export function Dialog({
         // Clicking the backdrop (the dialog element itself) closes it.
         if (e.target === e.currentTarget) onClose();
       }}
-      className="m-auto w-[min(440px,calc(100vw-32px))] rounded-[var(--radius-panel)] border border-hairline bg-panel-solid p-0 text-ink shadow-panel backdrop:bg-black/50 backdrop:backdrop-blur-[2px]"
+      className="mf-glass-strong m-auto w-[min(440px,calc(100vw-32px))] rounded-[var(--radius-panel)] p-0 text-ink shadow-panel backdrop:bg-black/50 backdrop:backdrop-blur-[2px]"
     >
       <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
         <h2 className="text-[15px] font-semibold tracking-[-0.01em]">

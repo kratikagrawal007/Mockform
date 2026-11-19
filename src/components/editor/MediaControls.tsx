@@ -150,7 +150,7 @@ export function VideoSection() {
             type="button"
             aria-label={playing ? "Pause" : "Play"}
             onClick={() => (playing ? pause() : play())}
-            className="grid size-9 shrink-0 place-items-center rounded-full bg-accent text-on-accent hover:bg-accent-hover"
+            className="mf-accent-gloss grid size-9 shrink-0 place-items-center rounded-full text-on-accent"
           >
             {playing ? (
               <Pause className="size-4" aria-hidden />
