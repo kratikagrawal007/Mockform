@@ -53,6 +53,12 @@
   --mf-ambient-1: rgb(109 74 255 / 0.28);
   --mf-ambient-2: rgb(47 184 201 / 0.16);
   --mf-ambient-3: rgb(255 122 89 / 0.13);
+
+  /* Value sliders: the fill and handle brighten on hover. */
+  --mf-slider-fill: rgb(255 255 255 / 0.08);
+  --mf-slider-fill-hover: rgb(141 113 255 / 0.24);
+  --mf-slider-handle: rgb(243 242 239 / 0.55);
+  --mf-slider-handle-hover: #ffffff;
 }
 
 [data-theme="light"] {
@@ -102,6 +108,11 @@
   --mf-ambient-1: rgb(150 120 255 / 0.22);
   --mf-ambient-2: rgb(120 214 222 / 0.2);
   --mf-ambient-3: rgb(255 168 140 / 0.2);
+
+  --mf-slider-fill: rgb(20 18 14 / 0.08);
+  --mf-slider-fill-hover: rgb(109 74 255 / 0.16);
+  --mf-slider-handle: rgb(22 21 26 / 0.45);
+  --mf-slider-handle-hover: #16151a;
 }
 
 @theme inline {
@@ -226,6 +237,30 @@ body {
     var(--mf-thumb-bottom)
   );
   box-shadow: var(--mf-thumb-shadow);
+}
+
+/* Value sliders: on hover (or keyboard focus) the filled part takes on a
+   hint of the accent and the handle brightens, easing over 150 ms. */
+.mf-slider-fill,
+.mf-slider-handle {
+  transition:
+    background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.mf-slider-fill {
+  background: var(--mf-slider-fill);
+}
+.mf-slider-handle {
+  background: var(--mf-slider-handle);
+}
+.group:hover .mf-slider-fill,
+.group:has(:focus-visible) .mf-slider-fill {
+  background: var(--mf-slider-fill-hover);
+}
+.group:hover .mf-slider-handle,
+.group:has(:focus-visible) .mf-slider-handle {
+  background: var(--mf-slider-handle-hover);
+  box-shadow: 0 0 6px rgb(141 113 255 / 0.6);
 }
 
 /* Glossy accent buttons: a slightly lighter top and a lit rim. */

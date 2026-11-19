@@ -34,20 +34,20 @@ export function ValueSlider({
 
   return (
     <label
-      className="mf-well relative block h-9 overflow-hidden rounded-[var(--radius-control)] select-none has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent"
+      className="mf-well group relative block h-9 overflow-hidden rounded-[var(--radius-control)] select-none has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent"
       onDoubleClick={() => onChange(defaultValue)}
     >
       <span
         aria-hidden
-        className="absolute inset-y-0 bg-active"
+        className="mf-slider-fill absolute inset-y-0"
         style={{ left: `${left}%`, width: `${width}%` }}
       />
       <span
         aria-hidden
-        className="absolute inset-y-2 w-0.5 -translate-x-1/2 rounded-full bg-ink/70"
+        className="mf-slider-handle absolute inset-y-2 w-0.5 -translate-x-1/2 rounded-full"
         style={{ left: `${Math.min(98.5, Math.max(1.5, at))}%` }}
       />
-      <span className="absolute inset-y-0 left-3 flex items-center text-label text-muted">
+      <span className="absolute inset-y-0 left-3 flex items-center text-label text-muted transition-colors duration-150 group-hover:text-ink group-has-[:focus-visible]:text-ink">
         {label}
       </span>
       <span className="absolute inset-y-0 right-3 flex items-center font-mono text-label text-ink tabular-nums">
